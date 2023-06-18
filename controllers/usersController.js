@@ -32,7 +32,7 @@ const createNewUser = async (req, res) => {
     .collation({ locale: "en", strength: 2 })
     .lean()
     .exec();
-  if (duplicate && duplicate?._id.toString() !== id) {
+  if (duplicate) {
     return res.status(409).json({ message: "Username not available" });
   }
 
