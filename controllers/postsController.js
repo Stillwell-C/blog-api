@@ -19,8 +19,32 @@ const getPost = async (req, res) => {
 
 const getAllPosts = async (req, res) => {
   //figure out pagination for this
-  const posts = await Post.find().lean().populate("author", "_id username");
-  if (!posts) return res.status(400).json({ message: "No users found" });
+  let topPosts;
+  if (req?.query?.top) {
+    topPosts = await Post.find()
+      .sort("-likes")
+      .limit(3)
+      .lean()
+      .populate("author", "_id username")
+      .exec();
+  }
+
+  const { page = 1, limit = 10 } = req.query;
+
+  const postsSkip = (page - 1) * limit;
+
+  const posts = await Post.find()
+    .sort("-createdAt")
+    .limit(limit)
+    .skip(postsSkip)
+    .lean()
+    .populate("author", "_id username")
+    .exec();
+
+  if (!posts) return res.status(400).json({ message: "No posts found" });
+
+  if (topPosts) return res.json({ top: topPosts, posts });
+
   res.json(posts);
 };
 
