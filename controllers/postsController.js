@@ -1,11 +1,15 @@
 const Post = require("../models/Post");
+const User = require("../models/User");
 
 const getPost = async (req, res) => {
   if (!req?.params?.id) {
     return res.status(400).json({ message: "Post ID required" });
   }
 
-  const post = await Post.findOne({ _id: req.params.id }).lean().exec();
+  const post = await Post.findOne({ _id: req.params.id })
+    .lean()
+    .populate("author", "_id username")
+    .exec();
 
   if (!post) {
     return res.status(400).json({ message: "Post not found" });
@@ -15,19 +19,27 @@ const getPost = async (req, res) => {
 
 const getAllPosts = async (req, res) => {
   //figure out pagination for this
-  const posts = await Post.find().lean();
+  const posts = await Post.find().lean().populate("author", "_id username");
   if (!posts) return res.status(400).json({ message: "No users found" });
   res.json(posts);
 };
 
 const createNewPost = async (req, res) => {
-  const { title, epigraph, text, author } = req.body;
+  const { title, epigraph, epigraphAuthor, text, author } = req.body;
 
   if (!title || !text || !author) {
     return res.status(400).json({ message: "All parameters required" });
   }
 
-  const newPost = { title, epigraph, text, author };
+  const authorCheck = await User.findById(author);
+
+  if (!authorCheck) {
+    return res.status(400).json({
+      message: "Invalid author. Please sign in before submitting post.",
+    });
+  }
+
+  const newPost = { title, epigraph, epigraphAuthor, text, author };
 
   const createdPost = await Post.create(newPost);
 

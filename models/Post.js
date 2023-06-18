@@ -8,6 +8,11 @@ const postSchema = new mongoose.Schema(
     },
     epigraph: {
       type: String,
+      default: "",
+    },
+    epigraphAuthor: {
+      type: String,
+      default: "",
     },
     text: {
       type: String,
@@ -17,6 +22,14 @@ const postSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "User",
+    },
+    likes: {
+      type: Number,
+      default: 0,
+    },
+    likedUsers: {
+      type: [mongoose.Schema.Types.ObjectId],
+      default: [],
     },
   },
   {
