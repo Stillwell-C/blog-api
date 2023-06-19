@@ -31,21 +31,26 @@ const getAllPosts = async (req, res) => {
 
   const { page = 1, limit = 10 } = req.query;
 
-  const postsSkip = (page - 1) * limit;
+  const pageInt = parseInt(page);
+  const limitInt = parseInt(limit);
+
+  const postsSkip = (pageInt - 1) * limitInt;
 
   const posts = await Post.find()
     .sort("-createdAt")
-    .limit(limit)
+    .limit(limitInt)
     .skip(postsSkip)
     .lean()
     .populate("author", "_id username")
     .exec();
 
+  const totalPosts = await Post.countDocuments({});
+
   if (!posts) return res.status(400).json({ message: "No posts found" });
 
-  if (topPosts) return res.json({ top: topPosts, posts });
+  if (topPosts) return res.json({ top: topPosts, posts, totalPosts });
 
-  res.json(posts);
+  res.json({ posts, totalPosts });
 };
 
 const createNewPost = async (req, res) => {
