@@ -30,13 +30,13 @@ const login = async (req, res) => {
       },
     },
     process.env.ACCESS_TOKEN_CODE,
-    { expiresIn: "10m" }
+    { expiresIn: "15m" }
   );
 
   const refreshToken = jwt.sign(
     { username: user.username },
     process.env.REFRESH_TOKEN_CODE,
-    { expiresIn: "1d" }
+    { expiresIn: "7d" }
   );
 
   //Send refresh token in a http only cookie
@@ -46,7 +46,7 @@ const login = async (req, res) => {
     httpOnly: true,
     secure: true,
     sameSite: "None",
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
   //Send accessToken
