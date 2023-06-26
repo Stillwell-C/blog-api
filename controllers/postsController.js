@@ -117,8 +117,11 @@ const deletePost = async (req, res) => {
 };
 
 const getUserPosts = async (req, res) => {
+  const { userId } = req?.params?.id;
+
+  if (!userId) return res.status(400).json({ message: "User ID required" });
+
   const { page, limit } = req.query;
-  const { userId } = req?.body;
 
   if (page && limit) {
     const pageInt = parseInt(page);
