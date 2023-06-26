@@ -116,10 +116,47 @@ const deletePost = async (req, res) => {
   res.json({ message: `Deleted post ${deletedPost._id}` });
 };
 
+const getUserPosts = async (req, res) => {
+  const { page, limit } = req.query;
+  const { userId } = req?.body;
+
+  if (page && limit) {
+    const pageInt = parseInt(page);
+    const limitInt = parseInt(limit);
+
+    const postsSkip = (pageInt - 1) * limitInt;
+
+    const posts = await Post.find({ author: userId })
+      .sort("-createdAt")
+      .limit(limitInt)
+      .skip(postsSkip)
+      .lean()
+      .exec();
+
+    const totalPosts = await Post.countDocuments({});
+
+    if (!posts) return res.status(400).json({ message: "No posts found" });
+
+    res.json({ posts, totalPosts });
+  }
+
+  const posts = await Post.find({ author: userId })
+    .sort("-createdAt")
+    .lean()
+    .exec();
+
+  const totalPosts = await Post.countDocuments({});
+
+  if (!posts) return res.status(400).json({ message: "No posts found" });
+
+  res.json({ posts, totalPosts });
+};
+
 module.exports = {
   getPost,
   getAllPosts,
   createNewPost,
   updatePost,
   deletePost,
+  getUserPosts,
 };
