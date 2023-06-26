@@ -117,7 +117,7 @@ const deletePost = async (req, res) => {
 };
 
 const getUserPosts = async (req, res) => {
-  const { userId } = req?.params?.id;
+  const userId = req?.params?.id;
 
   if (!userId) return res.status(400).json({ message: "User ID required" });
 
@@ -141,18 +141,18 @@ const getUserPosts = async (req, res) => {
     if (!posts) return res.status(400).json({ message: "No posts found" });
 
     res.json({ posts, totalPosts });
+  } else {
+    const posts = await Post.find({ author: userId })
+      .sort("-createdAt")
+      .lean()
+      .exec();
+
+    const totalPosts = await Post.countDocuments({});
+
+    if (!posts) return res.status(400).json({ message: "No posts found" });
+
+    res.json({ posts, totalPosts });
   }
-
-  const posts = await Post.find({ author: userId })
-    .sort("-createdAt")
-    .lean()
-    .exec();
-
-  const totalPosts = await Post.countDocuments({});
-
-  if (!posts) return res.status(400).json({ message: "No posts found" });
-
-  res.json({ posts, totalPosts });
 };
 
 module.exports = {
