@@ -27,6 +27,7 @@ const login = async (req, res) => {
       UserInfo: {
         username: user.username,
         roles: user.roles,
+        id: user._id,
       },
     },
     process.env.ACCESS_TOKEN_CODE,
@@ -81,6 +82,7 @@ const refresh = (req, res) => {
           UserInfo: {
             username: user.username,
             roles: user.roles,
+            id: user._id,
           },
         },
         process.env.ACCESS_TOKEN_CODE,
