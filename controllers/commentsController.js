@@ -22,13 +22,7 @@ const getComment = async (req, res) => {
 //Will return all comments for a given post
 //May be good to paginate at some point
 const getComments = async (req, res) => {
-  const { parentPostId } = req.body;
-
-  if (!parentPostId) {
-    return res.status(400).json({ message: "Parent Post ID required" });
-  }
-
-  const comments = await Comment.find({ parentPostId })
+  const comments = await Comment.find()
     .lean()
     .populate("author", "_id username")
     .exec();
@@ -51,7 +45,7 @@ const getUserComments = async (req, res) => {
 
     const postsSkip = (pageInt - 1) * limitInt;
 
-    const userComments = await Comment.find({ author: userId })
+    const comments = await Comment.find({ author: userId })
       .sort("-createdAt")
       .limit(limitInt)
       .skip(postsSkip)
@@ -60,22 +54,22 @@ const getUserComments = async (req, res) => {
 
     const totalPosts = await Comment.countDocuments({ author: userId });
 
-    if (!userComments)
+    if (!comments)
       return res.status(400).json({ message: "No comments found" });
 
-    res.json({ userComments, totalPosts });
+    res.json({ comments, totalPosts });
   } else {
-    const userComments = await Comment.find({ author: userId })
+    const comments = await Comment.find({ author: userId })
       .sort("-createdAt")
       .lean()
       .exec();
 
     const totalPosts = await Comment.countDocuments({ author: userId });
 
-    if (!userComments)
+    if (!comments)
       return res.status(400).json({ message: "No comments found" });
 
-    res.json({ userComments, totalPosts });
+    res.json({ comments, totalPosts });
   }
 };
 
@@ -94,7 +88,7 @@ const getPostComments = async (req, res) => {
 
     const postsSkip = (pageInt - 1) * limitInt;
 
-    const userComments = await Comment.find({ parentPostId: postId })
+    const comments = await Comment.find({ parentPostId: postId })
       .sort("-createdAt")
       .limit(limitInt)
       .skip(postsSkip)
@@ -103,22 +97,22 @@ const getPostComments = async (req, res) => {
 
     const totalPosts = await Comment.countDocuments({ parentPostId: postId });
 
-    if (!userComments)
+    if (!comments)
       return res.status(400).json({ message: "No comments found" });
 
-    res.json({ userComments, totalPosts });
+    res.json({ comments, totalPosts });
   } else {
-    const userComments = await Comment.find({ parentPostId: postId })
+    const comments = await Comment.find({ parentPostId: postId })
       .sort("-createdAt")
       .lean()
       .exec();
 
     const totalPosts = await Comment.countDocuments({ parentPostId: postId });
 
-    if (!userComments)
+    if (!comments)
       return res.status(400).json({ message: "No comments found" });
 
-    res.json({ userComments, totalPosts });
+    res.json({ comments, totalPosts });
   }
 };
 
