@@ -136,7 +136,7 @@ const getUserPosts = async (req, res) => {
       .lean()
       .exec();
 
-    const totalPosts = await Post.countDocuments({});
+    const totalPosts = await Post.countDocuments({ author: userId });
 
     if (!posts) return res.status(400).json({ message: "No posts found" });
 
@@ -147,7 +147,7 @@ const getUserPosts = async (req, res) => {
       .lean()
       .exec();
 
-    const totalPosts = await Post.countDocuments({});
+    const totalPosts = await Post.countDocuments({ author: userId });
 
     if (!posts) return res.status(400).json({ message: "No posts found" });
 
