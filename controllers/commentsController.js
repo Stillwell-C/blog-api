@@ -50,6 +50,7 @@ const getUserComments = async (req, res) => {
       .limit(limitInt)
       .skip(postsSkip)
       .lean()
+      .populate("author", "_id username")
       .exec();
 
     const totalPosts = await Comment.countDocuments({ author: userId });
@@ -62,6 +63,7 @@ const getUserComments = async (req, res) => {
     const comments = await Comment.find({ author: userId })
       .sort("-createdAt")
       .lean()
+      .populate("author", "_id username")
       .exec();
 
     const totalPosts = await Comment.countDocuments({ author: userId });
@@ -75,6 +77,7 @@ const getUserComments = async (req, res) => {
 
 const getPostComments = async (req, res) => {
   const postId = req?.params?.id;
+  console.log(postId);
 
   if (!postId) {
     return res.status(400).json({ message: "User ID required" });
@@ -93,6 +96,7 @@ const getPostComments = async (req, res) => {
       .limit(limitInt)
       .skip(postsSkip)
       .lean()
+      .populate("author", "_id username")
       .exec();
 
     const totalPosts = await Comment.countDocuments({ parentPostId: postId });
@@ -105,6 +109,7 @@ const getPostComments = async (req, res) => {
     const comments = await Comment.find({ parentPostId: postId })
       .sort("-createdAt")
       .lean()
+      .populate("author", "_id username")
       .exec();
 
     const totalPosts = await Comment.countDocuments({ parentPostId: postId });
