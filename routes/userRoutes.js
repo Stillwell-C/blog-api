@@ -16,6 +16,6 @@ router.route("/:id").get(usersController.getUser);
 
 router.route("/:id/posts").get(postsController.getUserPosts);
 
-router.route("/:id/comments").get(commentsController.getAuthorComments);
+router.route("/:id/comments").get(commentsController.getUserComments);
 
 module.exports = router;
