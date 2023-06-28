@@ -46,7 +46,7 @@ const getUserComments = async (req, res) => {
     const postsSkip = (pageInt - 1) * limitInt;
 
     const comments = await Comment.find({ author: userId })
-      .sort("-createdAt")
+      .sort("createdAt")
       .limit(limitInt)
       .skip(postsSkip)
       .lean()
@@ -61,7 +61,7 @@ const getUserComments = async (req, res) => {
     res.json({ comments, totalComments });
   } else {
     const comments = await Comment.find({ author: userId })
-      .sort("-createdAt")
+      .sort("createdAt")
       .lean()
       .populate("author", "_id username")
       .exec();
@@ -92,7 +92,7 @@ const getPostComments = async (req, res) => {
     const postsSkip = (pageInt - 1) * limitInt;
 
     const comments = await Comment.find({ parentPostId: postId })
-      .sort("-createdAt")
+      .sort("createdAt")
       .limit(limitInt)
       .skip(postsSkip)
       .lean()
@@ -109,7 +109,7 @@ const getPostComments = async (req, res) => {
     res.json({ comments, totalComments });
   } else {
     const comments = await Comment.find({ parentPostId: postId })
-      .sort("-createdAt")
+      .sort("createdAt")
       .lean()
       .populate("author", "_id username")
       .exec();
