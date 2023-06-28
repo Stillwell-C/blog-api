@@ -30,6 +30,7 @@ const postSchema = new mongoose.Schema(
     likedUsers: {
       type: [mongoose.Schema.Types.ObjectId],
       default: [],
+      ref: "User",
     },
   },
   {
