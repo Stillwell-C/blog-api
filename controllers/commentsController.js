@@ -53,12 +53,12 @@ const getUserComments = async (req, res) => {
       .populate("author", "_id username")
       .exec();
 
-    const totalPosts = await Comment.countDocuments({ author: userId });
+    const totalComments = await Comment.countDocuments({ author: userId });
 
     if (!comments)
       return res.status(400).json({ message: "No comments found" });
 
-    res.json({ comments, totalPosts });
+    res.json({ comments, totalComments });
   } else {
     const comments = await Comment.find({ author: userId })
       .sort("-createdAt")
@@ -66,12 +66,12 @@ const getUserComments = async (req, res) => {
       .populate("author", "_id username")
       .exec();
 
-    const totalPosts = await Comment.countDocuments({ author: userId });
+    const totalComments = await Comment.countDocuments({ author: userId });
 
     if (!comments)
       return res.status(400).json({ message: "No comments found" });
 
-    res.json({ comments, totalPosts });
+    res.json({ comments, totalComments });
   }
 };
 
@@ -99,12 +99,14 @@ const getPostComments = async (req, res) => {
       .populate("author", "_id username")
       .exec();
 
-    const totalPosts = await Comment.countDocuments({ parentPostId: postId });
+    const totalComments = await Comment.countDocuments({
+      parentPostId: postId,
+    });
 
     if (!comments)
       return res.status(400).json({ message: "No comments found" });
 
-    res.json({ comments, totalPosts });
+    res.json({ comments, totalComments });
   } else {
     const comments = await Comment.find({ parentPostId: postId })
       .sort("-createdAt")
@@ -112,12 +114,14 @@ const getPostComments = async (req, res) => {
       .populate("author", "_id username")
       .exec();
 
-    const totalPosts = await Comment.countDocuments({ parentPostId: postId });
+    const totalComments = await Comment.countDocuments({
+      parentPostId: postId,
+    });
 
     if (!comments)
       return res.status(400).json({ message: "No comments found" });
 
-    res.json({ comments, totalPosts });
+    res.json({ comments, totalComments });
   }
 };
 
