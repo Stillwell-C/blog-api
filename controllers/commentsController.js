@@ -77,7 +77,6 @@ const getUserComments = async (req, res) => {
 
 const getPostComments = async (req, res) => {
   const postId = req?.params?.id;
-  console.log(postId);
 
   if (!postId) {
     return res.status(400).json({ message: "User ID required" });
