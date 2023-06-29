@@ -15,4 +15,6 @@ router.route("/:id").get(postsController.getPost);
 
 router.route("/:id/comments").get(commentsController.getPostComments);
 
+router.route("/:id/like").patch(postsController.updatePostLike);
+
 module.exports = router;
