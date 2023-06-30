@@ -16,9 +16,36 @@ const getUser = async (req, res) => {
 };
 
 const getAllUsers = async (req, res) => {
-  const users = await User.find().select("-password").lean();
-  if (!users) return res.status(400).json({ message: "No users found" });
-  res.json(users);
+  const { page, limit } = req.query;
+
+  if (page && limit) {
+    const pageInt = parseInt(page);
+    const limitInt = parseInt(limit);
+
+    const postsSkip = (pageInt - 1) * limitInt;
+
+    const users = await User.find()
+      .sort("username")
+      .limit(limitInt)
+      .skip(postsSkip)
+      .select("-password")
+      .lean()
+      .exec();
+
+    const totalUsers = await User.countDocuments();
+
+    if (!users) return res.status(400).json({ message: "No users found" });
+
+    res.json({ users, totalUsers });
+  } else {
+    const users = await User.find().sort("username").select("-password").lean();
+
+    const totalUsers = await User.countDocuments();
+
+    if (!users) return res.status(400).json({ message: "No users found" });
+
+    res.json({ users, totalUsers });
+  }
 };
 
 const createNewUser = async (req, res) => {
