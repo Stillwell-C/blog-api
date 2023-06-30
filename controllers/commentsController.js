@@ -22,12 +22,42 @@ const getComment = async (req, res) => {
 //Will return all comments for a given post
 //May be good to paginate at some point
 const getComments = async (req, res) => {
-  const comments = await Comment.find()
-    .lean()
-    .populate("author", "_id username")
-    .exec();
+  const { page, limit } = req.query;
 
-  res.json(comments);
+  if (page && limit) {
+    const pageInt = parseInt(page);
+    const limitInt = parseInt(limit);
+
+    const postsSkip = (pageInt - 1) * limitInt;
+
+    const comments = await Comment.find()
+      .sort("createdAt")
+      .limit(limitInt)
+      .skip(postsSkip)
+      .lean()
+      .populate("author", "_id username")
+      .exec();
+
+    const totalComments = await Comment.countDocuments();
+
+    if (!comments)
+      return res.status(400).json({ message: "No comments found" });
+
+    res.json({ comments, totalComments });
+  } else {
+    const comments = await Comment.find()
+      .sort("createdAt")
+      .lean()
+      .populate("author", "_id username")
+      .exec();
+
+    const totalComments = await Comment.countDocuments();
+
+    if (!comments)
+      return res.status(400).json({ message: "No comments found" });
+
+    res.json({ comments, totalComments });
+  }
 };
 
 const getUserComments = async (req, res) => {
