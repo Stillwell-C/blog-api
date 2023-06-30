@@ -158,42 +158,44 @@ const updatePost = async (req, res) => {
 // };
 
 const updatePostLike = async (req, res) => {
-  const postId = req?.params?.id;
+  const postID = req?.params?.id;
 
-  const { userId, increment } = req?.body;
+  const { userID, increment } = req?.body;
 
-  if (!postId) {
+  if (!postID) {
     return res.status(400).json({ message: "Post ID parameter required" });
   }
 
-  const post = await Post.findOne({ _id: postId }).exec();
+  const post = await Post.findOne({ _id: postID }).exec();
 
   if (!post) return res.status(400).json({ message: "Post not found" });
 
-  if (!userId) {
+  if (!userID) {
     return res.status(400).json({ message: "User ID parameter required" });
   }
 
-  const user = await User.findById(userId).exec();
+  const user = await User.findById(userID).exec();
 
   if (!user) res.status(400).json({ message: "Post not found" });
 
   if (increment > 0) {
     const updatedPost = await Post.findOneAndUpdate(
-      { _id: postId, likedUsers: { $nin: userId } },
-      { $inc: { likes: increment }, $push: { likedUsers: userId } }
+      { _id: postID, likedUsers: { $nin: userID } },
+      { $inc: { likes: increment }, $push: { likedUsers: userID } }
     );
 
-    if (!post) return res.status(400).json({ message: "Post not found" });
+    if (!updatedPost)
+      return res.status(400).json({ message: "Post not found" });
 
     res.json({ message: `Updated post: ${updatedPost._id}` });
   } else {
     const updatedPost = await Post.findOneAndUpdate(
-      { _id: postId, likedUsers: { $in: userId } },
-      { $inc: { likes: increment }, $pull: { likedUsers: userId } }
+      { _id: postID, likedUsers: { $in: userID } },
+      { $inc: { likes: increment }, $pull: { likedUsers: userID } }
     );
 
-    if (!post) return res.status(400).json({ message: "Post not found" });
+    if (!updatedPost)
+      return res.status(400).json({ message: "Post not found" });
 
     res.json({ message: `Updated post: ${updatedPost._id}` });
   }
