@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const getUser = async (req, res) => {
   if (!req?.params?.id)
@@ -104,7 +105,20 @@ const updateUser = async (req, res) => {
 
   const updatedUser = await user.save();
 
-  res.json({ message: `Updated user: ${updatedUser._id}` });
+  //Send new access token with updated user info
+  const accessToken = jwt.sign(
+    {
+      UserInfo: {
+        username: updatedUser.username,
+        roles: updatedUser.roles,
+        id: updatedUser._id,
+      },
+    },
+    process.env.ACCESS_TOKEN_CODE,
+    { expiresIn: "10m" }
+  );
+
+  res.json({ accessToken });
 };
 
 const deleteUser = async (req, res) => {
