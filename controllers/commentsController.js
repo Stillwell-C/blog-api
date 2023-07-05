@@ -185,37 +185,51 @@ const updateComment = async (req, res) => {
     return res.status(400).json({ message: "Comment body parameter required" });
   }
 
-  const comment = await Comment.findById(req.body.id).exec();
+  const updatedComment = await Comment.findOneAndUpdate(
+    { _id: req.body.id },
+    { commentBody: req.body.commentBody },
+    { new: true }
+  ).exec();
 
-  if (!comment) {
+  if (!updatedComment) {
     return res.status(400).json({ message: "Comment not found" });
   }
 
-  comment.commentBody = req?.body.commentBody;
+  // const comment = await Comment.findById(req.body.id).exec();
 
-  const updateComment = await comment.save();
+  // if (!comment) {
+  //   return res.status(400).json({ message: "Comment not found" });
+  // }
 
-  res.json({ message: `Updated comment: ${updateComment._id}` });
+  // comment.commentBody = req?.body.commentBody;
+
+  // const updateComment = await comment.save();
+
+  res.json({ message: `Updated comment: ${updatedComment._id}` });
 };
 
 const deleteComment = async (req, res) => {
   const { id } = req.body;
 
-  console.log(id);
-
   if (!id) {
     return res.status(400).json({ message: "Comment ID required" });
   }
 
-  const comment = await Comment.findById(req.body.id).exec();
+  const deletedComment = Comment.findByIdAndDelete(req.body.id).exec();
 
-  if (!comment) {
+  if (!deletedComment) {
     return res.status(400).json({ message: "Comment not found" });
   }
 
-  const deletedComment = await comment.deleteOne();
+  // const comment = await Comment.findById(req.body.id).exec();
 
-  res.json({ message: `Deleted comment ${deleteComment._id}` });
+  // if (!comment) {
+  //   return res.status(400).json({ message: "Comment not found" });
+  // }
+
+  // const deletedComment = await comment.deleteOne();
+
+  res.json({ message: `Deleted comment ${deletedComment._id}` });
 };
 
 module.exports = {
