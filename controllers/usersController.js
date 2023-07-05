@@ -82,11 +82,10 @@ const updateUser = async (req, res) => {
     return res.status(400).json({ message: "User ID parameter required" });
   }
 
-  const user = await User.findOne({ _id: req.body.id }).exec();
+  const { username, password, roles } = req.body;
 
-  if (!user) return res.status(400).json({ message: "User not found" });
-
-  if (req.body?.username) {
+  const updateObj = {};
+  if (username) {
     //Check for any duplicate usernames
     const duplicate = await User.findOne({ username: req.body.username })
       .collation({ locale: "en", strength: 2 })
@@ -95,15 +94,21 @@ const updateUser = async (req, res) => {
     if (duplicate && duplicate?._id.toString() !== id) {
       return res.status(409).json({ message: "Username not available" });
     }
-    user.username = req.body.username;
+    updateObj.username = username;
   }
-  if (req.body?.roles) user.roles = req.body.roles;
-  if (req.body?.password) {
+  if (password) {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    user.password = hashedPassword;
+    updateObj.password = hashedPassword;
+  }
+  if (roles) {
+    updateObj.roles = roles;
   }
 
-  const updatedUser = await user.save();
+  const updatedUser = await User.findOneAndUpdate(
+    { _id: req.body.id },
+    { ...updateObj },
+    { new: true }
+  );
 
   //Send new access token with updated user info
   const accessToken = jwt.sign(
