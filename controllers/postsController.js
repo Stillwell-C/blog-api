@@ -178,13 +178,19 @@ const deletePost = async (req, res) => {
     return res.status(400).json({ message: "Post ID required" });
   }
 
-  const post = await Post.findOne({ _id: id }).exec();
+  const deletedPost = await Post.findByIdAndDelete(id).exec();
 
-  if (!post) {
+  if (!deletedPost) {
     return res.status(400).json({ message: "Post not found" });
   }
 
-  const deletedPost = await post.deleteOne();
+  // const post = await Post.findOne({ _id: id }).exec();
+
+  // if (!post) {
+  //   return res.status(400).json({ message: "Post not found" });
+  // }
+
+  // const deletedPost = await post.deleteOne();
 
   res.json({ message: `Deleted post ${deletedPost._id}` });
 };
