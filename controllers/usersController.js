@@ -133,13 +133,19 @@ const deleteUser = async (req, res) => {
     return res.status(400).json({ message: "User ID required" });
   }
 
-  const user = await User.findOne({ _id: id }).exec();
+  const deletedUser = await User.findByIdAndDelete(id).exec();
 
-  if (!user) {
+  if (!deletedUser) {
     return res.status(400).json({ message: "User not found" });
   }
 
-  const deletedUser = await user.deleteOne();
+  // const user = await User.findOne({ _id: id }).exec();
+
+  // if (!user) {
+  //   return res.status(400).json({ message: "User not found" });
+  // }
+
+  // const deletedUser = await user.deleteOne();
 
   res.json({
     message: `Username ${deletedUser.username} successfully deleted`,
