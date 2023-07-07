@@ -12,11 +12,6 @@ const getPost = async (req, res) => {
   }
   const userId = req?.query?.userId;
 
-  // const post = await Post.findOne({ _id: req.params.id })
-  //   .lean()
-  //   .populate("author", "_id username")
-  //   .exec();
-
   const post = await findPost({ _id: req.params.id });
 
   if (!post) {
