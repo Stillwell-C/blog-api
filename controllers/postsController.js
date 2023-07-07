@@ -8,12 +8,12 @@ const getPost = async (req, res) => {
   }
   const userId = req?.query?.userId;
 
-  const post = await Post.findOne({ _id: req.params.id })
-    .lean()
-    .populate("author", "_id username")
-    .exec();
+  // const post = await Post.findOne({ _id: req.params.id })
+  //   .lean()
+  //   .populate("author", "_id username")
+  //   .exec();
 
-  // const post = await findPost({ _id: req.params.id });
+  const post = await findPost({ _id: req.params.id });
 
   if (!post) {
     return res.status(400).json({ message: "Post not found" });
@@ -33,9 +33,8 @@ const getPost = async (req, res) => {
 };
 
 const getAllPosts = async (req, res) => {
-  //figure out pagination for this
   let topPosts;
-  if (req?.query?.top) {
+  if (req?.query?.top === "true") {
     topPosts = await Post.find()
       .sort("-likes")
       .limit(3)
@@ -45,21 +44,44 @@ const getAllPosts = async (req, res) => {
       .exec();
   }
 
-  const { page = 1, limit = 10 } = req.query;
+  let posts;
+  const { page, limit } = req.query;
+  if (page || limit) {
+    const pageInt = parseInt(page) || 1;
+    const limitInt = parseInt(limit) || 10;
 
-  const pageInt = parseInt(page);
-  const limitInt = parseInt(limit);
+    const postsSkip = (pageInt - 1) * limitInt;
 
-  const postsSkip = (pageInt - 1) * limitInt;
+    posts = await Post.find()
+      .sort("-createdAt")
+      .limit(limitInt)
+      .skip(postsSkip)
+      .lean()
+      .select("-likedUsers")
+      .populate("author", "_id username")
+      .exec();
+  } else {
+    posts = await Post.find()
+      .sort("-createdAt")
+      .lean()
+      .select("-likedUsers")
+      .populate("author", "_id username")
+      .exec();
+  }
 
-  const posts = await Post.find()
-    .sort("-createdAt")
-    .limit(limitInt)
-    .skip(postsSkip)
-    .lean()
-    .select("-likedUsers")
-    .populate("author", "_id username")
-    .exec();
+  // const pageInt = parseInt(page);
+  // const limitInt = parseInt(limit);
+
+  // const postsSkip = (pageInt - 1) * limitInt;
+
+  // const posts = await Post.find()
+  //   .sort("-createdAt")
+  //   .limit(limitInt)
+  //   .skip(postsSkip)
+  //   .lean()
+  //   .select("-likedUsers")
+  //   .populate("author", "_id username")
+  //   .exec();
 
   const totalPosts = await Post.countDocuments({});
 
