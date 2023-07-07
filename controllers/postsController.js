@@ -1,17 +1,19 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
+const { findPost } = require("../service/post.services");
 
 const getPost = async (req, res) => {
   if (!req?.params?.id) {
     return res.status(400).json({ message: "Post ID required" });
   }
-
   const userId = req?.query?.userId;
 
   const post = await Post.findOne({ _id: req.params.id })
     .lean()
     .populate("author", "_id username")
     .exec();
+
+  // const post = await findPost({ _id: req.params.id });
 
   if (!post) {
     return res.status(400).json({ message: "Post not found" });
@@ -61,7 +63,7 @@ const getAllPosts = async (req, res) => {
 
   const totalPosts = await Post.countDocuments({});
 
-  if (!posts) return res.status(400).json({ message: "No posts found" });
+  if (!posts.length) return res.status(400).json({ message: "No posts found" });
 
   if (topPosts) return res.json({ top: topPosts, posts, totalPosts });
 
