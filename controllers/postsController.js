@@ -42,7 +42,8 @@ const getAllPosts = async (req, res) => {
 
   const totalPosts = await Post.countDocuments({});
 
-  if (!posts.length) return res.status(400).json({ message: "No posts found" });
+  if (!posts?.length)
+    return res.status(400).json({ message: "No posts found" });
 
   if (topPosts) return res.json({ top: topPosts, posts, totalPosts });
 
