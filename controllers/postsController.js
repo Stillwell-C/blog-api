@@ -1,6 +1,10 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
-const { findPost } = require("../service/post.services");
+const {
+  findPost,
+  findMultiplePosts,
+  findTopPosts,
+} = require("../service/post.services");
 
 const getPost = async (req, res) => {
   if (!req?.params?.id) {
@@ -35,53 +39,11 @@ const getPost = async (req, res) => {
 const getAllPosts = async (req, res) => {
   let topPosts;
   if (req?.query?.top === "true") {
-    topPosts = await Post.find()
-      .sort("-likes")
-      .limit(3)
-      .lean()
-      .select("-likedUsers")
-      .populate("author", "_id username")
-      .exec();
+    topPosts = await findTopPosts();
   }
 
-  let posts;
   const { page, limit } = req.query;
-  if (page || limit) {
-    const pageInt = parseInt(page) || 1;
-    const limitInt = parseInt(limit) || 10;
-
-    const postsSkip = (pageInt - 1) * limitInt;
-
-    posts = await Post.find()
-      .sort("-createdAt")
-      .limit(limitInt)
-      .skip(postsSkip)
-      .lean()
-      .select("-likedUsers")
-      .populate("author", "_id username")
-      .exec();
-  } else {
-    posts = await Post.find()
-      .sort("-createdAt")
-      .lean()
-      .select("-likedUsers")
-      .populate("author", "_id username")
-      .exec();
-  }
-
-  // const pageInt = parseInt(page);
-  // const limitInt = parseInt(limit);
-
-  // const postsSkip = (pageInt - 1) * limitInt;
-
-  // const posts = await Post.find()
-  //   .sort("-createdAt")
-  //   .limit(limitInt)
-  //   .skip(postsSkip)
-  //   .lean()
-  //   .select("-likedUsers")
-  //   .populate("author", "_id username")
-  //   .exec();
+  const posts = await findMultiplePosts(page, limit);
 
   const totalPosts = await Post.countDocuments({});
 
