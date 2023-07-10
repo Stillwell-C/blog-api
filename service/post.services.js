@@ -69,7 +69,7 @@ const findAndDeletePost = async (postId) => {
   return Post.findByIdAndDelete(postId).exec();
 };
 
-const findUserPosts = async (page, limit) => {
+const findUserPosts = async (page, limit, userId) => {
   if (page || limit) {
     const pageInt = parseInt(page) || 1;
     const limitInt = parseInt(limit) || 10;

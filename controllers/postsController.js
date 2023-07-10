@@ -169,7 +169,7 @@ const getUserPosts = async (req, res) => {
 
   const { page, limit } = req.query;
 
-  const posts = await findUserPosts(page, limit);
+  const posts = await findUserPosts(page, limit, userId);
 
   const totalPosts = await Post.countDocuments({ author: userId });
 
