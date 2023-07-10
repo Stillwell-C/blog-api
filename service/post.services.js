@@ -39,6 +39,15 @@ const findMultiplePosts = async (page, limit) => {
   }
 };
 
-const exportFunctions = { findPost, findTopPosts, findMultiplePosts };
+const createPost = async (postData) => {
+  return Post.create(postData);
+};
+
+const exportFunctions = {
+  findPost,
+  findTopPosts,
+  findMultiplePosts,
+  createPost,
+};
 
 module.exports = exportFunctions;
