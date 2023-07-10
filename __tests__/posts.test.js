@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const createServer = require("../app");
 const { MongoMemoryServer } = require("mongodb-memory-server");
 const postServices = require("../service/post.services");
+const userServices = require("../service/user.services");
+const verifyJWT = require("../middleware/verifyJWT");
 
 const app = createServer();
 
@@ -33,7 +35,14 @@ jest.mock("../service/post.services", () => ({
   findPost: jest.fn(),
   findTopPosts: jest.fn(),
   findMultiplePosts: jest.fn(),
+  createPost: jest.fn(),
 }));
+
+jest.mock("../service/user.services", () => ({
+  findUserById: jest.fn(),
+}));
+
+jest.mock("../middleware/verifyJWT", () => jest.fn());
 
 const mockPostData = [
   {
@@ -153,6 +162,15 @@ const mockTopPostData = [
   },
 ];
 
+const mockUser = {
+  _id: mockMongooseId,
+  username: "mockUser",
+  password: "password",
+  roles: ["user", "contributor"],
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
 describe("post", () => {
   beforeAll(async () => {
     const mongoServer = await MongoMemoryServer.create();
@@ -162,6 +180,7 @@ describe("post", () => {
   afterAll(async () => {
     await mongoose.disconnect();
     await mongoose.connection.close();
+    jest.clearAllMocks();
   });
 
   describe("get post route", () => {
@@ -300,6 +319,92 @@ describe("post", () => {
           .expect("Content-Type", /json/);
         expect(body).toHaveProperty("top");
         expect(body.top.length).toBe(3);
+      });
+    });
+  });
+
+  describe("create new post route", () => {
+    describe("given no title, text, or author", () => {
+      it("it should return a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.createPost.mockImplementation(() => mockPostData[0]);
+        userServices.findUserById.mockImplementation(() => mockUser);
+
+        const postNoTitle = { ...mockPostData[0] };
+        postNoTitle.title = "";
+        await request(app)
+          .post("/posts/")
+          .send(postNoTitle)
+          .expect("Content-Type", /json/)
+          .expect({ message: "All parameters required" })
+          .expect(400);
+
+        const postNoText = { ...mockPostData[0] };
+        postNoText.text = "";
+        await request(app)
+          .post("/posts/")
+          .send(postNoText)
+          .expect("Content-Type", /json/)
+          .expect({ message: "All parameters required" })
+          .expect(400);
+
+        const postNoAuthor = { ...mockPostData[0] };
+        postNoAuthor.author = "";
+        await request(app)
+          .post("/posts/")
+          .send(postNoAuthor)
+          .expect("Content-Type", /json/)
+          .expect({ message: "All parameters required" })
+          .expect(400);
+      });
+    });
+
+    describe("given invalid author", () => {
+      it("it should return a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.createPost.mockImplementation(() => mockPostData[0]);
+        //This result is same as author not being found
+        userServices.findUserById.mockImplementation(() => undefined);
+
+        await request(app)
+          .post("/posts/")
+          .send(mockPostData[0])
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "Invalid author. Please sign in before submitting post.",
+          })
+          .expect(400);
+      });
+    });
+
+    describe("given a post with title, text, or author", () => {
+      it("should return 201", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.createPost.mockImplementation(() => mockPostData[0]);
+        userServices.findUserById.mockImplementation(() => mockUser);
+
+        await request(app)
+          .post("/posts/")
+          .send(mockPostData[0])
+          .expect("Content-Type", /json/)
+          .expect(201);
+      });
+    });
+
+    describe("given that the post is not created", () => {
+      it("should return a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.createPost.mockImplementation(() => undefined);
+        userServices.findUserById.mockImplementation(() => mockUser);
+
+        await request(app)
+          .post("/posts/")
+          .send(mockPostData[0])
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "Invalid data recieved",
+          })
+          .expect(400);
       });
     });
   });
