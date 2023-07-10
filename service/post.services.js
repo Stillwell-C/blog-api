@@ -51,6 +51,20 @@ const findAndUpdatePost = async (postId, updatedPostData) => {
   ).exec();
 };
 
+const findPostAndUpdateLike = async (postID, userID, increment) => {
+  if (increment > 0) {
+    return Post.findOneAndUpdate(
+      { _id: postID, likedUsers: { $nin: userID } },
+      { $inc: { likes: increment }, $push: { likedUsers: userID } }
+    );
+  } else {
+    const updatedPost = await Post.findOneAndUpdate(
+      { _id: postID, likedUsers: { $in: userID } },
+      { $inc: { likes: increment }, $pull: { likedUsers: userID } }
+    );
+  }
+};
+
 const findAndDeletePost = async (postId) => {
   return Post.findByIdAndDelete(postId).exec();
 };
@@ -79,6 +93,7 @@ const exportFunctions = {
   findMultiplePosts,
   createPost,
   findAndUpdatePost,
+  findPostAndUpdateLike,
   findAndDeletePost,
   findUserPosts,
 };
