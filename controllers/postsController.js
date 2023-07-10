@@ -8,6 +8,7 @@ const {
   findAndUpdatePost,
   findAndDeletePost,
   findUserPosts,
+  findPostAndUpdateLike,
 } = require("../service/post.services");
 const { findUserById } = require("../service/user.services");
 
@@ -114,43 +115,35 @@ const updatePostLike = async (req, res) => {
 
   const { userID, increment } = req?.body;
 
+  if (!increment) {
+    return res
+      .status(400)
+      .json({ message: "Must include an increment parameter" });
+  }
+
+  if (increment !== 1 && increment !== -1) {
+    return res.status(400).json({ message: "Invalid increment parameter" });
+  }
+
   if (!postID) {
     return res.status(400).json({ message: "Post ID parameter required" });
   }
-
-  const post = await Post.findOne({ _id: postID }).exec();
-
-  if (!post) return res.status(400).json({ message: "Post not found" });
 
   if (!userID) {
     return res.status(400).json({ message: "User ID parameter required" });
   }
 
-  const user = await User.findById(userID).exec();
+  const user = await findUserById(userID);
 
-  if (!user) res.status(400).json({ message: "Post not found" });
+  if (!user) return res.status(400).json({ message: "User not found" });
 
-  if (increment > 0) {
-    const updatedPost = await Post.findOneAndUpdate(
-      { _id: postID, likedUsers: { $nin: userID } },
-      { $inc: { likes: increment }, $push: { likedUsers: userID } }
-    );
+  const updatedPost = await findPostAndUpdateLike(postID, userID, increment);
 
-    if (!updatedPost)
-      return res.status(400).json({ message: "Post not found" });
-
-    res.json({ message: `Updated post: ${updatedPost._id}` });
-  } else {
-    const updatedPost = await Post.findOneAndUpdate(
-      { _id: postID, likedUsers: { $in: userID } },
-      { $inc: { likes: increment }, $pull: { likedUsers: userID } }
-    );
-
-    if (!updatedPost)
-      return res.status(400).json({ message: "Post not found" });
-
-    res.json({ message: `Updated post: ${updatedPost._id}` });
+  if (!updatedPost) {
+    return res.status(400).json({ message: "Post not found" });
   }
+
+  res.json({ message: `Updated post: ${updatedPost._id}` });
 };
 
 const deletePost = async (req, res) => {
