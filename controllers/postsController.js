@@ -4,7 +4,9 @@ const {
   findPost,
   findMultiplePosts,
   findTopPosts,
+  createPost,
 } = require("../service/post.services");
+const { findUserById } = require("../service/user.services");
 
 const getPost = async (req, res) => {
   if (!req?.params?.id) {
@@ -57,7 +59,8 @@ const createNewPost = async (req, res) => {
     return res.status(400).json({ message: "All parameters required" });
   }
 
-  const authorCheck = await User.findById(author);
+  // const authorCheck = await User.findById(author);
+  const authorCheck = await findUserById(author);
 
   if (!authorCheck) {
     return res.status(400).json({
@@ -67,7 +70,8 @@ const createNewPost = async (req, res) => {
 
   const newPost = { title, epigraph, epigraphAuthor, text, author };
 
-  const createdPost = await Post.create(newPost);
+  // const createdPost = await Post.create(newPost);
+  const createdPost = await createPost(newPost);
 
   if (createdPost) {
     res.status(201).json({ message: `New post created: ${createdPost.title}` });
