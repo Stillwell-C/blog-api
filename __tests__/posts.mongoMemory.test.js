@@ -154,7 +154,6 @@ describe("Post - mongo memory server", () => {
       const { body } = await request(app)
         .get(`/posts/`)
         .expect("Content-Type", /json/);
-      console.log(body);
       expect(body.posts.length).toBe(11);
     });
   });
