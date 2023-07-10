@@ -5,6 +5,9 @@ const {
   findMultiplePosts,
   findTopPosts,
   createPost,
+  findAndUpdatePost,
+  findAndDeletePost,
+  findUserPosts,
 } = require("../service/post.services");
 const { findUserById } = require("../service/user.services");
 
@@ -59,7 +62,6 @@ const createNewPost = async (req, res) => {
     return res.status(400).json({ message: "All parameters required" });
   }
 
-  // const authorCheck = await User.findById(author);
   const authorCheck = await findUserById(author);
 
   if (!authorCheck) {
@@ -70,7 +72,6 @@ const createNewPost = async (req, res) => {
 
   const newPost = { title, epigraph, epigraphAuthor, text, author };
 
-  // const createdPost = await Post.create(newPost);
   const createdPost = await createPost(newPost);
 
   if (createdPost) {
@@ -87,28 +88,23 @@ const updatePost = async (req, res) => {
 
   const { title, epigraph, epigraphAuthor, text } = req.body;
 
-  const updatedPost = await Post.findOneAndUpdate(
-    { _id: req.body.id },
-    { title, epigraph, epigraphAuthor, text },
-    { new: true }
-  ).exec();
+  if (!title || !epigraph || !epigraphAuthor || !text) {
+    return res.status(400).json({
+      message:
+        "Update requires title, epigraph, epigraphAuthor, and text parameters",
+    });
+  }
 
-  if (!updatedPost) return res.status(400).json({ message: "Post not found" });
+  const updatedPost = await findAndUpdatePost(req.body.id, {
+    title,
+    epigraph,
+    epigraphAuthor,
+    text,
+  });
 
-  // const post = await Post.findOne(
-  //   { _id: req.body.id },
-  //   { title, epigraph, epigraphAuthor, text },
-  //   { new: true }
-  // ).exec();
-
-  // if (!post) return res.status(400).json({ message: "Post not found" });
-
-  // if (req?.body?.title) post.title = req.body.title;
-  // if (req?.body?.epigraph) post.epigraph = req.body.epigraph;
-  // if (req?.body?.text) post.text = req.body.text;
-  // if (req?.body?.author) post.author = req.body.author;
-
-  // const updatedPost = await post.save();
+  if (!updatedPost) {
+    return res.status(400).json({ message: "Post not found" });
+  }
 
   res.json({ message: `Updated post: ${updatedPost._id}` });
 };
@@ -164,19 +160,11 @@ const deletePost = async (req, res) => {
     return res.status(400).json({ message: "Post ID required" });
   }
 
-  const deletedPost = await Post.findByIdAndDelete(id).exec();
+  const deletedPost = await findAndDeletePost(id);
 
   if (!deletedPost) {
     return res.status(400).json({ message: "Post not found" });
   }
-
-  // const post = await Post.findOne({ _id: id }).exec();
-
-  // if (!post) {
-  //   return res.status(400).json({ message: "Post not found" });
-  // }
-
-  // const deletedPost = await post.deleteOne();
 
   res.json({ message: `Deleted post ${deletedPost._id}` });
 };
@@ -188,36 +176,13 @@ const getUserPosts = async (req, res) => {
 
   const { page, limit } = req.query;
 
-  if (page && limit) {
-    const pageInt = parseInt(page);
-    const limitInt = parseInt(limit);
+  const posts = await findUserPosts(page, limit);
 
-    const postsSkip = (pageInt - 1) * limitInt;
+  const totalPosts = await Post.countDocuments({ author: userId });
 
-    const posts = await Post.find({ author: userId })
-      .sort("-createdAt")
-      .limit(limitInt)
-      .skip(postsSkip)
-      .lean()
-      .exec();
+  if (!posts) return res.status(400).json({ message: "No posts found" });
 
-    const totalPosts = await Post.countDocuments({ author: userId });
-
-    if (!posts) return res.status(400).json({ message: "No posts found" });
-
-    res.json({ posts, totalPosts });
-  } else {
-    const posts = await Post.find({ author: userId })
-      .sort("-createdAt")
-      .lean()
-      .exec();
-
-    const totalPosts = await Post.countDocuments({ author: userId });
-
-    if (!posts) return res.status(400).json({ message: "No posts found" });
-
-    res.json({ posts, totalPosts });
-  }
+  res.json({ posts, totalPosts });
 };
 
 module.exports = {
