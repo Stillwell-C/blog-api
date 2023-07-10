@@ -36,6 +36,9 @@ jest.mock("../service/post.services", () => ({
   findTopPosts: jest.fn(),
   findMultiplePosts: jest.fn(),
   createPost: jest.fn(),
+  findAndUpdatePost: jest.fn(),
+  findAndDeletePost: jest.fn(),
+  findUserPosts: jest.fn(),
 }));
 
 jest.mock("../service/user.services", () => ({
@@ -403,6 +406,196 @@ describe("post", () => {
           .expect("Content-Type", /json/)
           .expect({
             message: "Invalid data recieved",
+          })
+          .expect(400);
+      });
+    });
+  });
+
+  describe("update post route", () => {
+    describe("Given no ID", () => {
+      it("should return a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.findAndUpdatePost.mockImplementation(
+          () => mockPostData[0]
+        );
+
+        await request(app)
+          .patch("/posts/")
+          .send({ ...mockPostData[0] })
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "Post ID parameter required",
+          })
+          .expect(400);
+      });
+    });
+
+    describe("Given incomplete data", () => {
+      it("Should return a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.findAndUpdatePost.mockImplementation(
+          () => mockPostData[0]
+        );
+
+        const noTitle = { ...mockPostData[0], id: mockMongooseId, title: "" };
+        await request(app)
+          .patch("/posts/")
+          .send(noTitle)
+          .expect("Content-Type", /json/)
+          .expect({
+            message:
+              "Update requires title, epigraph, epigraphAuthor, and text parameters",
+          })
+          .expect(400);
+
+        const noEpigraph = {
+          ...mockPostData[0],
+          id: mockMongooseId,
+          epigraph: "",
+        };
+        await request(app)
+          .patch("/posts/")
+          .send(noEpigraph)
+          .expect("Content-Type", /json/)
+          .expect({
+            message:
+              "Update requires title, epigraph, epigraphAuthor, and text parameters",
+          })
+          .expect(400);
+
+        const noEpigraphAuthor = {
+          ...mockPostData[0],
+          id: mockMongooseId,
+          epigraphAuthor: "",
+        };
+        await request(app)
+          .patch("/posts/")
+          .send(noEpigraphAuthor)
+          .expect("Content-Type", /json/)
+          .expect({
+            message:
+              "Update requires title, epigraph, epigraphAuthor, and text parameters",
+          })
+          .expect(400);
+
+        const noText = { ...mockPostData[0], id: mockMongooseId, text: "" };
+        await request(app)
+          .patch("/posts/")
+          .send(noText)
+          .expect("Content-Type", /json/)
+          .expect({
+            message:
+              "Update requires title, epigraph, epigraphAuthor, and text parameters",
+          })
+          .expect(400);
+      });
+    });
+
+    describe("Given an ID & data", () => {
+      it("should return a 200", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.findAndUpdatePost.mockImplementation(
+          () => mockPostData[0]
+        );
+
+        await request(app)
+          .patch(`/posts`)
+          .send({ id: mockMongooseId, ...mockPostData[0] })
+          .expect("Content-Type", /json/)
+          .expect(200);
+      });
+    });
+
+    describe("Given update failure", () => {
+      it("should return a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.findAndUpdatePost.mockImplementation(() => undefined);
+
+        await request(app)
+          .patch(`/posts`)
+          .send({ id: mockMongooseId, ...mockPostData[0] })
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "Post not found",
+          })
+          .expect(400);
+      });
+    });
+  });
+
+  describe("delete post route", () => {
+    describe("given no id", () => {
+      it("should return 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.findAndDeletePost.mockImplementation(
+          () => mockPostData[0]
+        );
+
+        await request(app)
+          .delete("/posts/")
+          .send(mockPostData[0])
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "Post ID required",
+          })
+          .expect(400);
+      });
+    });
+
+    describe("given an id", () => {
+      it("should return 200", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.findAndDeletePost.mockImplementation(
+          () => mockPostData[0]
+        );
+
+        await request(app)
+          .delete("/posts/")
+          .send({ id: mockMongooseId, ...mockPostData[0] })
+          .expect("Content-Type", /json/)
+          .expect(200);
+      });
+    });
+
+    describe("given that update fails", () => {
+      it("should return 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.findAndDeletePost.mockImplementation(() => undefined);
+
+        await request(app)
+          .delete("/posts/")
+          .send({ id: mockMongooseId, ...mockPostData[0] })
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "Post not found",
+          })
+          .expect(400);
+      });
+    });
+  });
+
+  describe("get user post routes", () => {
+    describe("given a user Id", () => {
+      it("should return a 200", async () => {
+        postServices.findUserPosts.mockImplementation(() => mockPostData);
+
+        await request(app)
+          .get(`/users/${mockMongooseId}/posts`)
+          .expect("Content-Type", /json/)
+          .expect(200);
+      });
+    });
+
+    describe("given not posts returned", () => {
+      it("should return a 400", async () => {
+        postServices.findUserPosts.mockImplementation(() => undefined);
+
+        await request(app)
+          .get(`/users/${mockMongooseId}/posts`)
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "No posts found",
           })
           .expect(400);
       });
