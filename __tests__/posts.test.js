@@ -37,6 +37,7 @@ jest.mock("../service/post.services", () => ({
   findMultiplePosts: jest.fn(),
   createPost: jest.fn(),
   findAndUpdatePost: jest.fn(),
+  findPostAndUpdateLike: jest.fn(),
   findAndDeletePost: jest.fn(),
   findUserPosts: jest.fn(),
 }));
@@ -174,7 +175,7 @@ const mockUser = {
   updatedAt: new Date(),
 };
 
-describe("post", () => {
+describe("post routes", () => {
   beforeAll(async () => {
     const mongoServer = await MongoMemoryServer.create();
     await mongoose.connect(mongoServer.getUri());
@@ -519,6 +520,120 @@ describe("post", () => {
           .expect({
             message: "Post not found",
           })
+          .expect(400);
+      });
+    });
+  });
+
+  describe("update post like route", () => {
+    describe("given no user ID", () => {
+      it("should return a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.findPostAndUpdateLike.mockImplementation(
+          () => mockPostData[0]
+        );
+        userServices.findUserById.mockImplementation(() => mockUser);
+
+        await request(app)
+          .patch(`/posts/${mockMongooseId}/like`)
+          .send({ increment: 1 })
+          .expect("Content-Type", /json/)
+          .expect({ message: "User ID parameter required" })
+          .expect(400);
+      });
+    });
+
+    describe("given no increment", () => {
+      it("should return a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.findPostAndUpdateLike.mockImplementation(
+          () => mockPostData[0]
+        );
+        userServices.findUserById.mockImplementation(() => mockUser);
+
+        await request(app)
+          .patch(`/posts/${mockMongooseId}/like`)
+          .send({ userID: mockMongooseId })
+          .expect("Content-Type", /json/)
+          .expect({ message: "Must include an increment parameter" })
+          .expect(400);
+      });
+    });
+
+    describe("given an invalid increment", () => {
+      it("should return a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.findPostAndUpdateLike.mockImplementation(
+          () => mockPostData[0]
+        );
+        userServices.findUserById.mockImplementation(() => mockUser);
+
+        await request(app)
+          .patch(`/posts/${mockMongooseId}/like`)
+          .send({ userID: mockMongooseId, increment: 5 })
+          .expect("Content-Type", /json/)
+          .expect({ message: "Invalid increment parameter" })
+          .expect(400);
+
+        await request(app)
+          .patch(`/posts/${mockMongooseId}/like`)
+          .send({ userID: mockMongooseId, increment: -3 })
+          .expect("Content-Type", /json/)
+          .expect({ message: "Invalid increment parameter" })
+          .expect(400);
+      });
+    });
+
+    describe("given valid post ID, increment value, & user ID", () => {
+      it("should return a 200", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.findPostAndUpdateLike.mockImplementation(
+          () => mockPostData[0]
+        );
+        userServices.findUserById.mockImplementation(() => mockUser);
+
+        await request(app)
+          .patch(`/posts/${mockMongooseId}/like`)
+          .send({ userID: mockMongooseId, increment: 1 })
+          .expect("Content-Type", /json/)
+          .expect(200);
+
+        await request(app)
+          .patch(`/posts/${mockMongooseId}/like`)
+          .send({ userID: mockMongooseId, increment: -1 })
+          .expect("Content-Type", /json/)
+          .expect(200);
+      });
+    });
+
+    describe("given that an updated post is not returned", () => {
+      it("should return a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.findPostAndUpdateLike.mockImplementation(() => undefined);
+        userServices.findUserById.mockImplementation(() => mockUser);
+
+        await request(app)
+          .patch(`/posts/${mockMongooseId}/like`)
+          .send({ userID: mockMongooseId, increment: 1 })
+          .expect("Content-Type", /json/)
+          .expect({ message: "Post not found" })
+          .expect(400);
+      });
+    });
+
+    describe("given that a user is not found", () => {
+      it("should return a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        postServices.findPostAndUpdateLike.mockImplementation(
+          () => mockPostData[0]
+        );
+        userServices.findUserById.mockImplementation(() => undefined);
+
+        await request(app)
+          .patch(`/posts/${mockMongooseId}/like`)
+          .send({ userID: mockMongooseId, increment: 1 })
+          .expect("Content-Type", /json/)
+          .expect({ message: "User not found" })
           .expect(400);
       });
     });
