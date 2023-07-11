@@ -1,7 +1,17 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { findUserById } = require("../service/user.services");
+const {
+  findUserById,
+  findMultipleUsers,
+  duplicateUserCheck,
+  generateNewUser,
+  findAndUpdateUser,
+} = require("../service/user.services");
+const {
+  generateAccessToken,
+  hashPassword,
+} = require("../service/auth.services");
 
 const getUser = async (req, res) => {
   if (!req?.params?.id)
@@ -18,34 +28,13 @@ const getUser = async (req, res) => {
 const getAllUsers = async (req, res) => {
   const { page, limit } = req.query;
 
-  if (page && limit) {
-    const pageInt = parseInt(page);
-    const limitInt = parseInt(limit);
+  const users = await findMultipleUsers(page, limit);
 
-    const postsSkip = (pageInt - 1) * limitInt;
+  const totalUsers = await User.countDocuments();
 
-    const users = await User.find()
-      .sort("username")
-      .limit(limitInt)
-      .skip(postsSkip)
-      .select("-password")
-      .lean()
-      .exec();
+  if (!users) return res.status(400).json({ message: "No users found" });
 
-    const totalUsers = await User.countDocuments();
-
-    if (!users) return res.status(400).json({ message: "No users found" });
-
-    res.json({ users, totalUsers });
-  } else {
-    const users = await User.find().sort("username").select("-password").lean();
-
-    const totalUsers = await User.countDocuments();
-
-    if (!users) return res.status(400).json({ message: "No users found" });
-
-    res.json({ users, totalUsers });
-  }
+  res.json({ users, totalUsers });
 };
 
 const createNewUser = async (req, res) => {
@@ -55,19 +44,17 @@ const createNewUser = async (req, res) => {
     return res.status(400).json({ message: "Username and password required" });
   }
 
-  const duplicate = await User.findOne({ username })
-    .collation({ locale: "en", strength: 2 })
-    .lean()
-    .exec();
+  const duplicate = await duplicateUserCheck(username);
+
   if (duplicate) {
     return res.status(409).json({ message: "Username not available" });
   }
 
-  const hashedPassword = await bcrypt.hash(req.body.password, 10);
+  const hashedPassword = await hashPassword(password);
 
   const newUser = { username, password: hashedPassword };
 
-  const createdUser = await User.create(newUser);
+  const createdUser = await generateNewUser(newUser);
 
   if (createdUser) {
     res.status(201).json({ message: `New user ${username} created` });
@@ -85,41 +72,30 @@ const updateUser = async (req, res) => {
 
   const updateObj = {};
   if (username) {
-    //Check for any duplicate usernames
-    const duplicate = await User.findOne({ username: req.body.username })
-      .collation({ locale: "en", strength: 2 })
-      .lean()
-      .exec();
-    if (duplicate && duplicate?._id.toString() !== id) {
+    const duplicate = await duplicateUserCheck(username);
+    if (duplicate && duplicate?._id.toString() !== req.body.id) {
       return res.status(409).json({ message: "Username not available" });
     }
     updateObj.username = username;
   }
   if (password) {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const hashedPassword = await hashPassword(password);
     updateObj.password = hashedPassword;
   }
   if (roles) {
     updateObj.roles = roles;
   }
 
-  const updatedUser = await User.findOneAndUpdate(
-    { _id: req.body.id },
-    { ...updateObj },
-    { new: true }
-  );
+  const updatedUser = await findAndUpdateUser(req.body.id, updateObj);
 
-  //Send new access token with updated user info
-  const accessToken = jwt.sign(
-    {
-      UserInfo: {
-        username: updatedUser.username,
-        roles: updatedUser.roles,
-        id: updatedUser._id,
-      },
-    },
-    process.env.ACCESS_TOKEN_CODE,
-    { expiresIn: "10m" }
+  if (!updatedUser) {
+    return res.status(400).json({ message: "Invalid data received" });
+  }
+
+  const accessToken = generateAccessToken(
+    updatedUser.username,
+    updatedUser.roles,
+    updatedUser._id
   );
 
   res.json({ accessToken });
