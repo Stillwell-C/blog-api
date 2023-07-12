@@ -51,16 +51,20 @@ const findAndUpdatePost = async (postId, updatedPostData) => {
   ).exec();
 };
 
+//This should update post without updating timestamps
+//Post will only show update if other content is updated
 const findPostAndUpdateLike = async (postID, userID, increment) => {
   if (increment > 0) {
     return Post.findOneAndUpdate(
       { _id: postID, likedUsers: { $nin: userID } },
-      { $inc: { likes: increment }, $push: { likedUsers: userID } }
+      { $inc: { likes: increment }, $push: { likedUsers: userID } },
+      { timestamps: false }
     );
   } else {
     const updatedPost = await Post.findOneAndUpdate(
       { _id: postID, likedUsers: { $in: userID } },
-      { $inc: { likes: increment }, $pull: { likedUsers: userID } }
+      { $inc: { likes: increment }, $pull: { likedUsers: userID } },
+      { timestamps: false }
     );
   }
 };
