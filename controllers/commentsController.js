@@ -44,7 +44,7 @@ const getUserComments = async (req, res) => {
 
   const { page, limit } = req.query;
 
-  const comments = findUserComments(page, limit, userId);
+  const comments = await findUserComments(page, limit, userId);
 
   const totalComments = await Comment.countDocuments({ author: userId });
 
@@ -64,7 +64,7 @@ const getPostComments = async (req, res) => {
 
   const { page, limit } = req.query;
 
-  const comments = findPostComments(page, limit, postId);
+  const comments = await findPostComments(page, limit, postId);
 
   const totalComments = await Comment.countDocuments({
     parentPostId: postId,
@@ -82,7 +82,11 @@ const createComment = async (req, res) => {
     return res.status(400).json({ message: "All parameters required" });
   }
 
-  const createdComment = createNewComment(author, parentPostId, commentBody);
+  const createdComment = await createNewComment(
+    author,
+    parentPostId,
+    commentBody
+  );
 
   if (createdComment) {
     res
