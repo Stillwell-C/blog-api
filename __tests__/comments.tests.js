@@ -35,6 +35,7 @@ jest.mock("../service/comments.services", () => ({
   findUserComments: jest.fn(),
   findPostComments: jest.fn(),
   createNewComment: jest.fn(),
+  findAndUpdateComment: jest.fn(),
 }));
 
 describe("comments route", () => {
@@ -286,6 +287,50 @@ describe("comments route", () => {
             message: "Invalid data recieved",
           })
           .expect(400);
+      });
+    });
+  });
+
+  describe("update comment route", () => {
+    describe("given no comment id or comment body in request body", () => {
+      it("will return a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        commentServices.findAndUpdateComment.mockImplementation(
+          () => mockComment
+        );
+
+        await request(app)
+          .patch("/comments")
+          .send({ commentBody: "some text" })
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "Comment ID parameter required",
+          })
+          .expect(400);
+
+        await request(app)
+          .patch("/comments")
+          .send({ id: mockMongooseId })
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "Comment body parameter required",
+          })
+          .expect(400);
+      });
+    });
+
+    describe("given a comment id and comment body in request body", () => {
+      it("will return a 200", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        commentServices.findAndUpdateComment.mockImplementation(
+          () => mockComment
+        );
+
+        await request(app)
+          .patch("/comments")
+          .send({ id: mockMongooseId, commentBody: "some text" })
+          .expect("Content-Type", /json/)
+          .expect(200);
       });
     });
   });
