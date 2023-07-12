@@ -6,6 +6,7 @@ const {
   findPostComments,
   createNewComment,
   findAndUpdateComment,
+  findAndDeleteComment,
 } = require("../service/comments.services");
 
 //Maybe remove, but could be useful for moderation
@@ -126,19 +127,11 @@ const deleteComment = async (req, res) => {
     return res.status(400).json({ message: "Comment ID required" });
   }
 
-  const deletedComment = Comment.findByIdAndDelete(req.body.id).exec();
+  const deletedComment = await findAndDeleteComment(id);
 
   if (!deletedComment) {
     return res.status(400).json({ message: "Comment not found" });
   }
-
-  // const comment = await Comment.findById(req.body.id).exec();
-
-  // if (!comment) {
-  //   return res.status(400).json({ message: "Comment not found" });
-  // }
-
-  // const deletedComment = await comment.deleteOne();
 
   res.json({ message: `Deleted comment ${deletedComment._id}` });
 };
