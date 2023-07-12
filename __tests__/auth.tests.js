@@ -275,7 +275,7 @@ describe("auth route", () => {
       });
     });
 
-    describe("given jwt, but user not found", () => {
+    describe("given jwt, but user not found with decoded jwt data", () => {
       it("will return 401", async () => {
         //If no user is found with the decoded refresh token, undefined will be returned
         authServices.verifyJWTAndReturnUser.mockImplementation(() => undefined);
@@ -289,6 +289,31 @@ describe("auth route", () => {
           .expect("Content-Type", /json/)
           .expect({ message: "Unauthorized" })
           .expect(401);
+      });
+    });
+  });
+
+  describe("logout route", () => {
+    describe("given no jwt", () => {
+      it("will return 204", async () => {
+        await request(app).post("/auth/logout").expect(204);
+      });
+    });
+
+    describe("given a jwt cookie is sent", () => {
+      it("will return 200 and clear cookies", async () => {
+        const { header } = await request(app)
+          .post("/auth/logout")
+          .set("Cookie", [`jwt=${mockRefreshToken}`])
+          .expect("Content-Type", /json/)
+          .expect({ message: "Cookie cleared" });
+
+        console.log(header);
+
+        expect(header["set-cookie"][0]).toMatch(/jwt=;/i);
+        expect(header["set-cookie"][0]).toMatch(/HttpOnly/i);
+        expect(header["set-cookie"][0]).toMatch(/Secure/i);
+        expect(header["set-cookie"][0]).toMatch(/SameSite=None/i);
       });
     });
   });
