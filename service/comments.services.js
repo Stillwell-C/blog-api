@@ -89,6 +89,10 @@ const findAndUpdateComment = async (id, commentBody) => {
   ).exec();
 };
 
+const findAndDeleteComment = async (id) => {
+  return Comment.findByIdAndDelete(id).exec();
+};
+
 const exportFunctions = {
   findCommentById,
   findMultipleComments,
@@ -96,6 +100,7 @@ const exportFunctions = {
   findPostComments,
   createNewComment,
   findAndUpdateComment,
+  findAndDeleteComment,
 };
 
 module.exports = exportFunctions;
