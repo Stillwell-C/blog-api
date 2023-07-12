@@ -4,6 +4,10 @@ const findUserById = async (userId) => {
   return User.findById(userId).select("-password").lean().exec();
 };
 
+const findUserByUsername = async (username) => {
+  return User.findOne({ username }).exec();
+};
+
 const findMultipleUsers = async (page, limit) => {
   if (page || limit) {
     const pageInt = parseInt(page) || 1;
@@ -44,6 +48,7 @@ const findAndDeleteUser = async (id) => {
 
 const exportFunctions = {
   findUserById,
+  findUserByUsername,
   findMultipleUsers,
   duplicateUserCheck,
   generateNewUser,
