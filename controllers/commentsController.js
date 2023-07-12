@@ -1,5 +1,8 @@
 const Comment = require("../models/Comment");
-const { findCommentById } = require("../service/comments.services");
+const {
+  findCommentById,
+  findMultipleComments,
+} = require("../service/comments.services");
 
 //Maybe remove, but could be useful for moderation
 const getComment = async (req, res) => {
@@ -20,40 +23,13 @@ const getComment = async (req, res) => {
 const getComments = async (req, res) => {
   const { page, limit } = req.query;
 
-  if (page && limit) {
-    const pageInt = parseInt(page);
-    const limitInt = parseInt(limit);
+  const totalComments = await Comment.countDocuments();
 
-    const postsSkip = (pageInt - 1) * limitInt;
+  const comments = findMultipleComments(page, limit);
 
-    const comments = await Comment.find()
-      .sort("createdAt")
-      .limit(limitInt)
-      .skip(postsSkip)
-      .lean()
-      .populate("author", "_id username")
-      .exec();
+  if (!comments) return res.status(400).json({ message: "No comments found" });
 
-    const totalComments = await Comment.countDocuments();
-
-    if (!comments)
-      return res.status(400).json({ message: "No comments found" });
-
-    res.json({ comments, totalComments });
-  } else {
-    const comments = await Comment.find()
-      .sort("createdAt")
-      .lean()
-      .populate("author", "_id username")
-      .exec();
-
-    const totalComments = await Comment.countDocuments();
-
-    if (!comments)
-      return res.status(400).json({ message: "No comments found" });
-
-    res.json({ comments, totalComments });
-  }
+  res.json({ comments, totalComments });
 };
 
 const getUserComments = async (req, res) => {
