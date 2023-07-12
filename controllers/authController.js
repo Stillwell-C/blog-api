@@ -7,6 +7,7 @@ const {
   comparePasswords,
   generateAccessToken,
   generateRefreshToken,
+  verifyJWTAndReturnUser,
 } = require("../service/auth.services");
 
 const login = async (req, res) => {
@@ -46,7 +47,7 @@ const login = async (req, res) => {
   res.json({ accessToken });
 };
 
-const refresh = (req, res) => {
+const refresh = async (req, res) => {
   const cookies = req.cookies;
 
   if (!cookies?.jwt) {
@@ -55,35 +56,23 @@ const refresh = (req, res) => {
 
   const refreshToken = cookies.jwt;
 
-  jwt.verify(
-    refreshToken,
-    process.env.REFRESH_TOKEN_CODE,
-    async (err, decoded) => {
-      if (err) {
-        return res.status(403).json({ message: "Forbidden" });
-      }
+  const verifiedUser = await verifyJWTAndReturnUser(refreshToken);
 
-      const user = await User.findOne({ username: decoded.username });
+  if (verifiedUser === "ACCESS FORBIDDEN") {
+    return res.status(403).json({ message: "Forbidden" });
+  }
 
-      if (!user) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+  if (!verifiedUser) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 
-      const accessToken = jwt.sign(
-        {
-          UserInfo: {
-            username: user.username,
-            roles: user.roles,
-            id: user._id,
-          },
-        },
-        process.env.ACCESS_TOKEN_CODE,
-        { expiresIn: "10m" }
-      );
-
-      res.json({ accessToken });
-    }
+  const accessToken = generateAccessToken(
+    verifiedUser.username,
+    verifiedUser.roles,
+    verifiedUser._id
   );
+
+  res.json({ accessToken });
 };
 
 const logout = (req, res) => {
