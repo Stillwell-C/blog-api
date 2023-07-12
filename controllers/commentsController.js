@@ -2,6 +2,9 @@ const Comment = require("../models/Comment");
 const {
   findCommentById,
   findMultipleComments,
+  findUserComments,
+  findPostComments,
+  createNewComment,
 } = require("../service/comments.services");
 
 //Maybe remove, but could be useful for moderation
@@ -41,40 +44,15 @@ const getUserComments = async (req, res) => {
 
   const { page, limit } = req.query;
 
-  if (page && limit) {
-    const pageInt = parseInt(page);
-    const limitInt = parseInt(limit);
+  const comments = findUserComments(page, limit, userId);
 
-    const postsSkip = (pageInt - 1) * limitInt;
+  const totalComments = await Comment.countDocuments({ author: userId });
 
-    const comments = await Comment.find({ author: userId })
-      .sort("createdAt")
-      .limit(limitInt)
-      .skip(postsSkip)
-      .lean()
-      .populate("author", "_id username")
-      .exec();
-
-    const totalComments = await Comment.countDocuments({ author: userId });
-
-    if (!comments)
-      return res.status(400).json({ message: "No comments found" });
-
-    res.json({ comments, totalComments });
-  } else {
-    const comments = await Comment.find({ author: userId })
-      .sort("createdAt")
-      .lean()
-      .populate("author", "_id username")
-      .exec();
-
-    const totalComments = await Comment.countDocuments({ author: userId });
-
-    if (!comments)
-      return res.status(400).json({ message: "No comments found" });
-
-    res.json({ comments, totalComments });
+  if (!comments) {
+    return res.status(400).json({ message: "No comments found" });
   }
+
+  res.json({ comments, totalComments });
 };
 
 const getPostComments = async (req, res) => {
@@ -86,44 +64,15 @@ const getPostComments = async (req, res) => {
 
   const { page, limit } = req.query;
 
-  if (page && limit) {
-    const pageInt = parseInt(page);
-    const limitInt = parseInt(limit);
+  const comments = findPostComments(page, limit, postId);
 
-    const postsSkip = (pageInt - 1) * limitInt;
+  const totalComments = await Comment.countDocuments({
+    parentPostId: postId,
+  });
 
-    const comments = await Comment.find({ parentPostId: postId })
-      .sort("createdAt")
-      .limit(limitInt)
-      .skip(postsSkip)
-      .lean()
-      .populate("author", "_id username")
-      .exec();
+  if (!comments) return res.status(400).json({ message: "No comments found" });
 
-    const totalComments = await Comment.countDocuments({
-      parentPostId: postId,
-    });
-
-    if (!comments)
-      return res.status(400).json({ message: "No comments found" });
-
-    res.json({ comments, totalComments });
-  } else {
-    const comments = await Comment.find({ parentPostId: postId })
-      .sort("createdAt")
-      .lean()
-      .populate("author", "_id username")
-      .exec();
-
-    const totalComments = await Comment.countDocuments({
-      parentPostId: postId,
-    });
-
-    if (!comments)
-      return res.status(400).json({ message: "No comments found" });
-
-    res.json({ comments, totalComments });
-  }
+  res.json({ comments, totalComments });
 };
 
 const createComment = async (req, res) => {
@@ -133,11 +82,7 @@ const createComment = async (req, res) => {
     return res.status(400).json({ message: "All parameters required" });
   }
 
-  const createdComment = await Comment.create({
-    author,
-    parentPostId,
-    commentBody,
-  });
+  const createdComment = createNewComment(author, parentPostId, commentBody);
 
   if (createdComment) {
     res
