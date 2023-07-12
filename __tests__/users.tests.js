@@ -38,7 +38,6 @@ describe("user routes", () => {
   afterAll(async () => {
     await mongoose.disconnect();
     await mongoose.connection.close();
-    jest.clearAllMocks();
   });
 
   afterEach(() => jest.clearAllMocks());
