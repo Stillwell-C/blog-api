@@ -108,7 +108,7 @@ const deleteUser = async (req, res) => {
     return res.status(400).json({ message: "User ID required" });
   }
 
-  const deletedUser = findAndDeleteUser(id);
+  const deletedUser = await findAndDeleteUser(id);
 
   if (!deletedUser) {
     return res.status(400).json({ message: "User not found" });
