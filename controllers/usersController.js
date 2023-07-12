@@ -1,12 +1,12 @@
 const User = require("../models/User");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+
 const {
   findUserById,
   findMultipleUsers,
   duplicateUserCheck,
   generateNewUser,
   findAndUpdateUser,
+  findAndDeleteUser,
 } = require("../service/user.services");
 const {
   generateAccessToken,
@@ -108,19 +108,11 @@ const deleteUser = async (req, res) => {
     return res.status(400).json({ message: "User ID required" });
   }
 
-  const deletedUser = await User.findByIdAndDelete(id).exec();
+  const deletedUser = findAndDeleteUser(id);
 
   if (!deletedUser) {
     return res.status(400).json({ message: "User not found" });
   }
-
-  // const user = await User.findOne({ _id: id }).exec();
-
-  // if (!user) {
-  //   return res.status(400).json({ message: "User not found" });
-  // }
-
-  // const deletedUser = await user.deleteOne();
 
   res.json({
     message: `Username ${deletedUser.username} successfully deleted`,
