@@ -81,12 +81,21 @@ const createNewComment = async (author, parentPostId, commentBody) => {
   });
 };
 
+const findAndUpdateComment = async (id, commentBody) => {
+  return Comment.findOneAndUpdate(
+    { _id: id },
+    { commentBody },
+    { new: true }
+  ).exec();
+};
+
 const exportFunctions = {
   findCommentById,
   findMultipleComments,
   findUserComments,
   findPostComments,
   createNewComment,
+  findAndUpdateComment,
 };
 
 module.exports = exportFunctions;
