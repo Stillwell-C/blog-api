@@ -38,12 +38,17 @@ const findAndUpdateUser = async (id, updateObj) => {
   return User.findOneAndUpdate({ _id: id }, { ...updateObj }, { new: true });
 };
 
+const findAndDeleteUser = async (id) => {
+  return User.findByIdAndDelete(id).exec();
+};
+
 const exportFunctions = {
   findUserById,
   findMultipleUsers,
   duplicateUserCheck,
   generateNewUser,
   findAndUpdateUser,
+  findAndDeleteUser,
 };
 
 module.exports = exportFunctions;
