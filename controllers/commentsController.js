@@ -1,17 +1,15 @@
 const Comment = require("../models/Comment");
+const { findCommentById } = require("../service/comments.services");
 
 //Maybe remove, but could be useful for moderation
 const getComment = async (req, res) => {
-  const { id } = req.body;
+  const id = req?.params?.id;
 
   if (!id) {
     return res.status(400).json({ message: "Comment ID required" });
   }
 
-  const comment = await Comment.findById(id)
-    .lean()
-    .populate("author", "_id username")
-    .exec();
+  const comment = await findCommentById(id);
 
   if (!comment) {
     return res.status(400).json({ message: "Comment not found" });
@@ -19,8 +17,6 @@ const getComment = async (req, res) => {
   res.json(comment);
 };
 
-//Will return all comments for a given post
-//May be good to paginate at some point
 const getComments = async (req, res) => {
   const { page, limit } = req.query;
 
