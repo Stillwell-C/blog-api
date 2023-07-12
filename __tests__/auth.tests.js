@@ -30,6 +30,7 @@ jest.mock("../service/auth.services", () => ({
   generateRefreshToken: jest.fn(),
   hashPassword: jest.fn(),
   comparePasswords: jest.fn(),
+  verifyJWTAndReturnUser: jest.fn(),
 }));
 
 jest.mock("../service/user.services", () => ({
@@ -125,7 +126,7 @@ describe("auth route", () => {
             .expect(200);
 
           expect(body).toHaveProperty("accessToken");
-          expect(body.accessToken).toEqual(expect.any(String));
+          expect(body.accessToken).toBe("thisisamockaccesstoken");
         });
 
         it("will set a cookie with the refresh token", async () => {
@@ -202,6 +203,92 @@ describe("auth route", () => {
             })
             .expect(401);
         });
+      });
+    });
+  });
+
+  describe("refresh route", () => {
+    describe("given a valid jwt for registered user", () => {
+      it("will return 200", async () => {
+        //A valid JWT of a registered user will return said user
+        authServices.verifyJWTAndReturnUser.mockImplementation(() => mockUser);
+        authServices.generateAccessToken.mockImplementation(
+          () => mockAccessToken
+        );
+
+        await request(app)
+          .get("/auth/refresh")
+          .set("Cookie", [`jwt=${mockRefreshToken}`])
+          .expect("Content-Type", /json/)
+          .expect(200);
+      });
+
+      it("will return a new access token", async () => {
+        //A valid JWT of a registered user will return said user
+        authServices.verifyJWTAndReturnUser.mockImplementation(() => mockUser);
+        authServices.generateAccessToken.mockImplementation(
+          () => mockAccessToken
+        );
+
+        const { body } = await request(app)
+          .get("/auth/refresh")
+          .set("Cookie", [`jwt=${mockRefreshToken}`])
+          .expect("Content-Type", /json/)
+          .expect(200);
+
+        expect(body).toHaveProperty("accessToken");
+        expect(body.accessToken).toBe("thisisamockaccesstoken");
+      });
+    });
+
+    describe("given no jwt is provided", () => {
+      it("will return 401", async () => {
+        authServices.verifyJWTAndReturnUser.mockImplementation(() => mockUser);
+        authServices.generateAccessToken.mockImplementation(
+          () => mockAccessToken
+        );
+
+        await request(app)
+          .get("/auth/refresh")
+          .expect("Content-Type", /json/)
+          .expect({ message: "Unauthorized" })
+          .expect(401);
+      });
+    });
+
+    describe("given an invalid jwt", () => {
+      it("will return 403", async () => {
+        //If there is an issue with the JWT, "ACCESS FORBIDDEN" will be returned
+        authServices.verifyJWTAndReturnUser.mockImplementation(
+          () => "ACCESS FORBIDDEN"
+        );
+        authServices.generateAccessToken.mockImplementation(
+          () => mockAccessToken
+        );
+
+        await request(app)
+          .get("/auth/refresh")
+          .set("Cookie", [`jwt=${mockRefreshToken}`])
+          .expect("Content-Type", /json/)
+          .expect({ message: "Forbidden" })
+          .expect(403);
+      });
+    });
+
+    describe("given jwt, but user not found", () => {
+      it("will return 401", async () => {
+        //If no user is found with the decoded refresh token, undefined will be returned
+        authServices.verifyJWTAndReturnUser.mockImplementation(() => undefined);
+        authServices.generateAccessToken.mockImplementation(
+          () => mockAccessToken
+        );
+
+        await request(app)
+          .get("/auth/refresh")
+          .set("Cookie", [`jwt=${mockRefreshToken}`])
+          .expect("Content-Type", /json/)
+          .expect({ message: "Unauthorized" })
+          .expect(401);
       });
     });
   });
