@@ -308,8 +308,6 @@ describe("auth route", () => {
           .expect("Content-Type", /json/)
           .expect({ message: "Cookie cleared" });
 
-        console.log(header);
-
         expect(header["set-cookie"][0]).toMatch(/jwt=;/i);
         expect(header["set-cookie"][0]).toMatch(/HttpOnly/i);
         expect(header["set-cookie"][0]).toMatch(/Secure/i);
