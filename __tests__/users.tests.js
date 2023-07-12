@@ -26,6 +26,7 @@ jest.mock("../service/user.services", () => ({
   duplicateUserCheck: jest.fn(),
   generateNewUser: jest.fn(),
   findAndUpdateUser: jest.fn(),
+  findAndDeleteUser: jest.fn(),
 }));
 
 describe("user routes", () => {
@@ -182,7 +183,7 @@ describe("user routes", () => {
     });
   });
 
-  describe("create new user route", () => {
+  describe("update user route", () => {
     describe("given no id is sent in body", () => {
       it("will return 400", async () => {
         verifyJWT.mockImplementation((req, res, next) => next());
@@ -257,6 +258,53 @@ describe("user routes", () => {
           .expect("Content-Type", /json/)
           .expect({
             message: "Invalid data received",
+          })
+          .expect(400);
+      });
+    });
+  });
+
+  describe("delete user route", () => {
+    describe("given no id in the request body", () => {
+      it("will return a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        userServices.findAndDeleteUser.mockImplementation(() => mockUser);
+
+        await request(app)
+          .delete("/users")
+          .send(mockUser)
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "User ID required",
+          })
+          .expect(400);
+      });
+    });
+
+    describe("given an id in the request body", () => {
+      it("will return a 200", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        userServices.findAndDeleteUser.mockImplementation(() => mockUser);
+
+        await request(app)
+          .delete("/users")
+          .send({ id: mockMongooseId, ...mockUser })
+          .expect("Content-Type", /json/)
+          .expect(200);
+      });
+    });
+
+    describe("given no user is returned after delete", () => {
+      it("will return a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        userServices.findAndDeleteUser.mockImplementation(() => undefined);
+
+        await request(app)
+          .delete("/users")
+          .send({ id: mockMongooseId, ...mockUser })
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "User not found",
           })
           .expect(400);
       });
