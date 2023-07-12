@@ -61,7 +61,7 @@ const findPostAndUpdateLike = async (postID, userID, increment) => {
       { timestamps: false }
     );
   } else {
-    const updatedPost = await Post.findOneAndUpdate(
+    return Post.findOneAndUpdate(
       { _id: postID, likedUsers: { $in: userID } },
       { $inc: { likes: increment }, $pull: { likedUsers: userID } },
       { timestamps: false }
