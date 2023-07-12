@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const { findUserByUsernameWithoutPassword } = require("./user.services");
 require("dotenv").config();
 
 const generateAccessToken = (username, roles, id) => {
@@ -22,6 +23,24 @@ const generateRefreshToken = (username) => {
   });
 };
 
+const verifyJWTAndReturnUser = async (refreshToken) => {
+  return jwt.verify(
+    refreshToken,
+    process.env.REFRESH_TOKEN_CODE,
+    async (err, decoded) => {
+      if (err) {
+        return "ACCESS FORBIDDEN";
+      }
+
+      const verifiedUser = await findUserByUsernameWithoutPassword(
+        decoded.username
+      );
+
+      return verifiedUser;
+    }
+  );
+};
+
 const hashPassword = async (password) => {
   return bcrypt.hash(password, 10);
 };
@@ -33,6 +52,7 @@ const comparePasswords = async (enteredPassword, userPassword) => {
 const exportFunctions = {
   generateAccessToken,
   generateRefreshToken,
+  verifyJWTAndReturnUser,
   hashPassword,
   comparePasswords,
 };
