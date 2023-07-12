@@ -2,6 +2,12 @@ require("dotenv").config();
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { findUserByUsername } = require("../service/user.services");
+const {
+  comparePasswords,
+  generateAccessToken,
+  generateRefreshToken,
+} = require("../service/auth.services");
 
 const login = async (req, res) => {
   const { username, password } = req.body;
@@ -10,35 +16,21 @@ const login = async (req, res) => {
     return res.status(400).json({ message: "Username and password required" });
   }
 
-  const user = await User.findOne({ username }).exec();
+  const user = await findUserByUsername(username);
 
   if (!user) {
     return res.status(401).json({ message: "Username not found" });
   }
 
-  const passwordMatch = await bcrypt.compare(password, user.password);
+  const passwordMatch = await comparePasswords(password, user.password);
 
   if (!passwordMatch) {
     return res.status(401).json({ message: "Password incorrect" });
   }
 
-  const accessToken = jwt.sign(
-    {
-      UserInfo: {
-        username: user.username,
-        roles: user.roles,
-        id: user._id,
-      },
-    },
-    process.env.ACCESS_TOKEN_CODE,
-    { expiresIn: "15m" }
-  );
+  const accessToken = generateAccessToken(user.username, user.roles, user._id);
 
-  const refreshToken = jwt.sign(
-    { username: user.username },
-    process.env.REFRESH_TOKEN_CODE,
-    { expiresIn: "7d" }
-  );
+  const refreshToken = generateRefreshToken(user.username);
 
   //Send refresh token in a http only cookie
   res.cookie("jwt", refreshToken, {
