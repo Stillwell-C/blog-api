@@ -5,6 +5,7 @@ const {
   findUserComments,
   findPostComments,
   createNewComment,
+  findAndUpdateComment,
 } = require("../service/comments.services");
 
 //Maybe remove, but could be useful for moderation
@@ -106,25 +107,14 @@ const updateComment = async (req, res) => {
     return res.status(400).json({ message: "Comment body parameter required" });
   }
 
-  const updatedComment = await Comment.findOneAndUpdate(
-    { _id: req.body.id },
-    { commentBody: req.body.commentBody },
-    { new: true }
-  ).exec();
+  const updatedComment = await findAndUpdateComment(
+    req.body.id,
+    req.body.commentBody
+  );
 
   if (!updatedComment) {
     return res.status(400).json({ message: "Comment not found" });
   }
-
-  // const comment = await Comment.findById(req.body.id).exec();
-
-  // if (!comment) {
-  //   return res.status(400).json({ message: "Comment not found" });
-  // }
-
-  // comment.commentBody = req?.body.commentBody;
-
-  // const updateComment = await comment.save();
 
   res.json({ message: `Updated comment: ${updatedComment._id}` });
 };
