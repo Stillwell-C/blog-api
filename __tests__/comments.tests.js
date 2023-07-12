@@ -36,6 +36,7 @@ jest.mock("../service/comments.services", () => ({
   findPostComments: jest.fn(),
   createNewComment: jest.fn(),
   findAndUpdateComment: jest.fn(),
+  findAndDeleteComment: jest.fn(),
 }));
 
 describe("comments route", () => {
@@ -331,6 +332,59 @@ describe("comments route", () => {
           .send({ id: mockMongooseId, commentBody: "some text" })
           .expect("Content-Type", /json/)
           .expect(200);
+      });
+    });
+  });
+
+  describe("delete comment route", () => {
+    describe("given no id in request body", () => {
+      it("will return a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        commentServices.findAndDeleteComment.mockImplementation(
+          () => mockComment
+        );
+
+        await request(app)
+          .delete("/comments")
+          .send({})
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "Comment ID required",
+          })
+          .expect(400);
+      });
+    });
+
+    describe("given an id in request body", () => {
+      it("will return a 200", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        commentServices.findAndDeleteComment.mockImplementation(
+          () => mockComment
+        );
+
+        await request(app)
+          .delete("/comments")
+          .send({ id: mockMongooseId })
+          .expect("Content-Type", /json/)
+          .expect(200);
+      });
+    });
+
+    describe("given that no data is returned after delete is called", () => {
+      it("will return a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        commentServices.findAndDeleteComment.mockImplementation(
+          () => undefined
+        );
+
+        await request(app)
+          .delete("/comments")
+          .send({ id: mockMongooseId })
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "Comment not found",
+          })
+          .expect(400);
       });
     });
   });
