@@ -32,6 +32,9 @@ jest.mock("../middleware/verifyJWT", () => jest.fn());
 jest.mock("../service/comments.services", () => ({
   findCommentById: jest.fn(),
   findMultipleComments: jest.fn(),
+  findUserComments: jest.fn(),
+  findPostComments: jest.fn(),
+  createNewComment: jest.fn(),
 }));
 
 describe("comments route", () => {
@@ -116,6 +119,173 @@ describe("comments route", () => {
         //The function this relies on is mocked, so it will not return an accurate value here.
         //The property should be returned, though.
         expect(body).toHaveProperty("totalComments");
+      });
+    });
+  });
+
+  describe("get user comments route", () => {
+    describe("given comment data is found", () => {
+      it("will return 200", async () => {
+        commentServices.findUserComments.mockImplementation(() => [
+          mockComment,
+          mockComment,
+          mockComment,
+        ]);
+
+        await request(app)
+          .get(`/users/${mockMongooseId}/comments`)
+          .expect("Content-Type", /json/)
+          .expect(200);
+      });
+
+      it("will return total comments", async () => {
+        commentServices.findUserComments.mockImplementation(() => [
+          mockComment,
+          mockComment,
+          mockComment,
+        ]);
+
+        const { body } = await request(app)
+          .get(`/users/${mockMongooseId}/comments`)
+          .expect("Content-Type", /json/);
+
+        //The function this relies on is mocked, so it will not return an accurate value here.
+        //The property should be returned, though.
+        expect(body).toHaveProperty("totalComments");
+      });
+    });
+
+    describe("give no comment data is found", () => {
+      it("will return 400", async () => {
+        commentServices.findUserComments.mockImplementation(() => undefined);
+
+        await request(app)
+          .get(`/users/${mockMongooseId}/comments`)
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "No comments found",
+          })
+          .expect(400);
+      });
+    });
+  });
+
+  describe("get post comments route", () => {
+    describe("given comment data is found", () => {
+      it("will return 200", async () => {
+        commentServices.findPostComments.mockImplementation(() => [
+          mockComment,
+          mockComment,
+          mockComment,
+        ]);
+
+        await request(app)
+          .get(`/posts/${mockMongooseId}/comments`)
+          .expect("Content-Type", /json/)
+          .expect(200);
+      });
+
+      it("will return total comments", async () => {
+        commentServices.findPostComments.mockImplementation(() => [
+          mockComment,
+          mockComment,
+          mockComment,
+        ]);
+
+        const { body } = await request(app)
+          .get(`/posts/${mockMongooseId}/comments`)
+          .expect("Content-Type", /json/);
+
+        //The function this relies on is mocked, so it will not return an accurate value here.
+        //The property should be returned, though.
+        expect(body).toHaveProperty("totalComments");
+      });
+    });
+
+    describe("give no comment data is found", () => {
+      it("will return 400", async () => {
+        commentServices.findPostComments.mockImplementation(() => undefined);
+
+        await request(app)
+          .get(`/posts/${mockMongooseId}/comments`)
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "No comments found",
+          })
+          .expect(400);
+      });
+    });
+  });
+
+  describe("create comment route", () => {
+    describe("given no author, parentPostId, or commentBody", () => {
+      it("will return 400", async () => {
+        commentServices.createNewComment.mockImplementation(() => mockComment);
+        verifyJWT.mockImplementation((req, res, next) => next());
+
+        await request(app)
+          .post(`/comments/`)
+          .send({ author: mockMongooseId, parentPostId: mockMongooseId })
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "All parameters required",
+          })
+          .expect(400);
+
+        await request(app)
+          .post(`/comments/`)
+          .send({ author: mockMongooseId, commentBody: "some text" })
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "All parameters required",
+          })
+          .expect(400);
+
+        await request(app)
+          .post(`/comments/`)
+          .send({ parentPostId: mockMongooseId, commentBody: "some text" })
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "All parameters required",
+          })
+          .expect(400);
+      });
+    });
+
+    describe("given an author, parentPostId, or commentBody", () => {
+      it("will return 200", async () => {
+        commentServices.createNewComment.mockImplementation(() => mockComment);
+        verifyJWT.mockImplementation((req, res, next) => next());
+
+        await request(app)
+          .post(`/comments/`)
+          .send({
+            author: mockMongooseId,
+            parentPostId: mockMongooseId,
+            commentBody: "some text",
+          })
+          .expect("Content-Type", /json/)
+          .expect(200);
+      });
+    });
+
+    describe("given that no data is returned after comment is created", () => {
+      it("will return 400", async () => {
+        commentServices.createNewComment.mockImplementation(() => undefined);
+        verifyJWT.mockImplementation((req, res, next) => next());
+
+        await request(app)
+          .post(`/comments/`)
+          .send({
+            author: mockMongooseId,
+            parentPostId: mockMongooseId,
+            commentBody: "some text",
+          })
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "Invalid data recieved",
+          })
+          .expect(400);
       });
     });
   });
