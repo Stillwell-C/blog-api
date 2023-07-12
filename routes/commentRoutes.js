@@ -10,4 +10,6 @@ router
   .patch(verifyJWT, commentsController.updateComment)
   .delete(verifyJWT, commentsController.deleteComment);
 
+router.route("/:id").get(commentsController.getComment);
+
 module.exports = router;
