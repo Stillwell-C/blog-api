@@ -287,7 +287,36 @@ describe("user routes", () => {
 
         await request(app)
           .delete("/users")
-          .send({ id: mockMongooseId, ...mockUser })
+          .send({ id: mockMongooseId })
+          .expect("Content-Type", /json/)
+          .expect(200);
+      });
+    });
+
+    describe("given an admin password which is incorrect", () => {
+      it("will return a 401", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        userServices.findAndDeleteUser.mockImplementation(() => mockUser);
+
+        await request(app)
+          .delete("/users")
+          .send({ id: mockMongooseId, adminPassword: "incorrectpassword" })
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "Incorrect password",
+          })
+          .expect(401);
+      });
+    });
+
+    describe("given an admin password which is incorrect", () => {
+      it("will return a 401", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        userServices.findAndDeleteUser.mockImplementation(() => mockUser);
+
+        await request(app)
+          .delete("/users")
+          .send({ id: mockMongooseId, adminPassword: process.env.ADMINPASS })
           .expect("Content-Type", /json/)
           .expect(200);
       });
@@ -300,7 +329,7 @@ describe("user routes", () => {
 
         await request(app)
           .delete("/users")
-          .send({ id: mockMongooseId, ...mockUser })
+          .send({ id: mockMongooseId })
           .expect("Content-Type", /json/)
           .expect({
             message: "User not found",
