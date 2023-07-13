@@ -30,7 +30,7 @@ const getComments = async (req, res) => {
 
   const totalComments = await Comment.countDocuments();
 
-  const comments = findMultipleComments(page, limit);
+  const comments = await findMultipleComments(page, limit);
 
   if (!comments) return res.status(400).json({ message: "No comments found" });
 
