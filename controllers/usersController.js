@@ -102,10 +102,14 @@ const updateUser = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
-  const { id } = req.body;
+  const { id, adminPassword } = req.body;
 
   if (!id) {
     return res.status(400).json({ message: "User ID required" });
+  }
+
+  if (adminPassword && adminPassword !== process.env.ADMINPASS) {
+    return res.status(401).json({ message: "Incorrect password" });
   }
 
   const deletedUser = await findAndDeleteUser(id);
