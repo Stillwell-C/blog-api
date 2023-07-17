@@ -5,19 +5,16 @@ const commentsController = require("../controllers/commentsController");
 const postsController = require("../controllers/postsController");
 const verifyJWT = require("../middleware/verifyJWT");
 const {
-  createUsernameChain,
-  createPasswordChain,
+  validateCreateUser,
+  validatePatchUser,
 } = require("../validation/userValidation");
+const { validatePagination } = require("../validation/generalValidation");
 
 router
   .route("/")
-  .get(verifyJWT, usersController.getAllUsers)
-  .post(
-    createUsernameChain(),
-    createPasswordChain(),
-    usersController.createNewUser
-  )
-  .patch(verifyJWT, usersController.updateUser)
+  .get(verifyJWT, validatePagination(), usersController.getAllUsers)
+  .post(validateCreateUser(), usersController.createNewUser)
+  .patch(verifyJWT, validatePatchUser(), usersController.updateUser)
   .delete(verifyJWT, usersController.deleteUser);
 
 router.route("/:id").get(usersController.getUser);
