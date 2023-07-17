@@ -353,7 +353,7 @@ describe("post routes", () => {
           .expect(400);
 
         const postNoAuthor = { ...mockPostData[0] };
-        postNoAuthor.author = "";
+        delete postNoAuthor.author;
         await request(app)
           .post("/posts/")
           .send(postNoAuthor)
