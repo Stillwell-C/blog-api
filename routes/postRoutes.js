@@ -10,6 +10,7 @@ const {
   validatePatchPost,
   validateUpdatePostLike,
 } = require("../validation/postsValidation");
+const { validateGetPostComments } = require("../validation/commentValidation");
 
 router
   .route("/")
@@ -20,7 +21,9 @@ router
 
 router.route("/:id").get(validateMongooseID(), postsController.getPost);
 
-router.route("/:id/comments").get(commentsController.getPostComments);
+router
+  .route("/:id/comments")
+  .get(validateGetPostComments(), commentsController.getPostComments);
 
 router
   .route("/:id/like")
