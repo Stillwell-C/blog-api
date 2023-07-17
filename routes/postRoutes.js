@@ -7,13 +7,14 @@ const { validateMongooseID } = require("../validation/generalValidation");
 const {
   validateGetPosts,
   validateCreatePost,
+  validatePatchPost,
 } = require("../validation/postsValidation");
 
 router
   .route("/")
   .get(validateGetPosts(), postsController.getAllPosts)
   .post(verifyJWT, validateCreatePost(), postsController.createNewPost)
-  .patch(verifyJWT, postsController.updatePost)
+  .patch(verifyJWT, validatePatchPost(), postsController.updatePost)
   .delete(verifyJWT, postsController.deletePost);
 
 router.route("/:id").get(validateMongooseID(), postsController.getPost);

@@ -67,6 +67,11 @@ const getAllPosts = async (req, res) => {
 };
 
 const createNewPost = async (req, res) => {
+  const valResult = validationResult(req);
+  if (!valResult.isEmpty()) {
+    return res.status(400).json({ message: "Invalid user input received" });
+  }
+
   const { title, epigraph, epigraphAuthor, text, author } = req.body;
 
   if (!title || !text) {
@@ -99,6 +104,11 @@ const createNewPost = async (req, res) => {
 };
 
 const updatePost = async (req, res) => {
+  const valResult = validationResult(req);
+  if (!valResult.isEmpty()) {
+    return res.status(400).json({ message: "Invalid user input received" });
+  }
+
   if (!req?.body?.id) {
     return res.status(400).json({ message: "Post ID parameter required" });
   }
