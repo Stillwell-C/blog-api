@@ -3,6 +3,7 @@ const router = express.Router();
 const postsController = require("../controllers/postsController");
 const commentsController = require("../controllers/commentsController");
 const verifyJWT = require("../middleware/verifyJWT");
+const { validateMongooseID } = require("../validation/generalValidation");
 
 router
   .route("/")
@@ -11,7 +12,7 @@ router
   .patch(verifyJWT, postsController.updatePost)
   .delete(verifyJWT, postsController.deletePost);
 
-router.route("/:id").get(postsController.getPost);
+router.route("/:id").get(validateMongooseID(), postsController.getPost);
 
 router.route("/:id/comments").get(commentsController.getPostComments);
 

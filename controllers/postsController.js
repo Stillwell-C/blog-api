@@ -1,5 +1,4 @@
 const Post = require("../models/Post");
-const User = require("../models/User");
 const {
   findPost,
   findMultiplePosts,
@@ -11,8 +10,14 @@ const {
   findPostAndUpdateLike,
 } = require("../service/post.services");
 const { findUserById } = require("../service/user.services");
+const { validationResult } = require("express-validator");
 
 const getPost = async (req, res) => {
+  const valResult = validationResult(req);
+  if (!valResult.isEmpty()) {
+    return res.status(400).json({ message: "Invalid user input received" });
+  }
+
   if (!req?.params?.id) {
     return res.status(400).json({ message: "Post ID required" });
   }
