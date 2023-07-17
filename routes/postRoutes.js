@@ -15,7 +15,7 @@ router
   .get(validateGetPosts(), postsController.getAllPosts)
   .post(verifyJWT, validateCreatePost(), postsController.createNewPost)
   .patch(verifyJWT, validatePatchPost(), postsController.updatePost)
-  .delete(verifyJWT, postsController.deletePost);
+  .delete(verifyJWT, validateMongooseID(), postsController.deletePost);
 
 router.route("/:id").get(validateMongooseID(), postsController.getPost);
 
