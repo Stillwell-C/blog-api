@@ -7,6 +7,7 @@ const verifyJWT = require("../middleware/verifyJWT");
 const {
   validateCreateUser,
   validatePatchUser,
+  validateDeleteUser,
 } = require("../validation/userValidation");
 const { validatePagination } = require("../validation/generalValidation");
 
@@ -15,7 +16,7 @@ router
   .get(verifyJWT, validatePagination(), usersController.getAllUsers)
   .post(validateCreateUser(), usersController.createNewUser)
   .patch(verifyJWT, validatePatchUser(), usersController.updateUser)
-  .delete(verifyJWT, usersController.deleteUser);
+  .delete(verifyJWT, validateDeleteUser(), usersController.deleteUser);
 
 router.route("/:id").get(usersController.getUser);
 
