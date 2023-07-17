@@ -4,10 +4,11 @@ const postsController = require("../controllers/postsController");
 const commentsController = require("../controllers/commentsController");
 const verifyJWT = require("../middleware/verifyJWT");
 const { validateMongooseID } = require("../validation/generalValidation");
+const { validateGetPosts } = require("../validation/postsValidation");
 
 router
   .route("/")
-  .get(postsController.getAllPosts)
+  .get(validateGetPosts(), postsController.getAllPosts)
   .post(verifyJWT, postsController.createNewPost)
   .patch(verifyJWT, postsController.updatePost)
   .delete(verifyJWT, postsController.deletePost);
