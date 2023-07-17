@@ -69,8 +69,14 @@ const getAllPosts = async (req, res) => {
 const createNewPost = async (req, res) => {
   const { title, epigraph, epigraphAuthor, text, author } = req.body;
 
-  if (!title || !text || !author) {
-    return res.status(400).json({ message: "All parameters required" });
+  if (!title || !text) {
+    return res.status(400).json({ message: "Title and text body required" });
+  }
+
+  if (!author) {
+    return res
+      .status(401)
+      .json({ message: "Please sign in before submitting post." });
   }
 
   const authorCheck = await findUserById(author);
