@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const { validationResult } = require("express-validator");
 
 const {
   findUserById,
@@ -42,6 +43,11 @@ const createNewUser = async (req, res) => {
 
   if (!username || !password) {
     return res.status(400).json({ message: "Username and password required" });
+  }
+
+  const valResult = validationResult(req);
+  if (!valResult.isEmpty()) {
+    return res.status(400).json({ message: "Invalid user input received" });
   }
 
   const duplicate = await duplicateUserCheck(username);
