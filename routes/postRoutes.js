@@ -8,6 +8,7 @@ const {
   validateGetPosts,
   validateCreatePost,
   validatePatchPost,
+  validateUpdatePostLike,
 } = require("../validation/postsValidation");
 
 router
@@ -21,6 +22,8 @@ router.route("/:id").get(validateMongooseID(), postsController.getPost);
 
 router.route("/:id/comments").get(commentsController.getPostComments);
 
-router.route("/:id/like").patch(verifyJWT, postsController.updatePostLike);
+router
+  .route("/:id/like")
+  .patch(verifyJWT, validateUpdatePostLike(), postsController.updatePostLike);
 
 module.exports = router;
