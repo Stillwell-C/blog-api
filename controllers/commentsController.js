@@ -152,6 +152,11 @@ const updateComment = async (req, res) => {
 };
 
 const deleteComment = async (req, res) => {
+  const valResult = validationResult(req);
+  if (!valResult.isEmpty()) {
+    return res.status(400).json({ message: "Invalid user input received" });
+  }
+
   const { id } = req.body;
 
   if (!id) {
