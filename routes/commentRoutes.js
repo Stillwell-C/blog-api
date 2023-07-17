@@ -16,7 +16,7 @@ router
   .get(validatePagination(), commentsController.getComments)
   .post(verifyJWT, validateNewComment(), commentsController.createComment)
   .patch(verifyJWT, validatePatchComment(), commentsController.updateComment)
-  .delete(verifyJWT, commentsController.deleteComment);
+  .delete(verifyJWT, validateMongooseID(), commentsController.deleteComment);
 
 router.route("/:id").get(validateMongooseID(), commentsController.getComment);
 
