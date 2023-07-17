@@ -27,6 +27,11 @@ const getUser = async (req, res) => {
 };
 
 const getAllUsers = async (req, res) => {
+  const valResult = validationResult(req);
+  if (!valResult.isEmpty()) {
+    return res.status(400).json({ message: "Invalid user input received" });
+  }
+
   const { page, limit } = req.query;
 
   const users = await findMultipleUsers(page, limit);
@@ -39,15 +44,15 @@ const getAllUsers = async (req, res) => {
 };
 
 const createNewUser = async (req, res) => {
+  const valResult = validationResult(req);
+  if (!valResult.isEmpty()) {
+    return res.status(400).json({ message: "Invalid user input received" });
+  }
+
   const { username, password } = req.body;
 
   if (!username || !password) {
     return res.status(400).json({ message: "Username and password required" });
-  }
-
-  const valResult = validationResult(req);
-  if (!valResult.isEmpty()) {
-    return res.status(400).json({ message: "Invalid user input received" });
   }
 
   const duplicate = await duplicateUserCheck(username);
@@ -70,6 +75,12 @@ const createNewUser = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
+  const valResult = validationResult(req);
+  if (!valResult.isEmpty()) {
+    console.log(valResult);
+    return res.status(400).json({ message: "Invalid user input received" });
+  }
+
   if (!req?.body?.id) {
     return res.status(400).json({ message: "User ID parameter required" });
   }
