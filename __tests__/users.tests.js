@@ -149,6 +149,38 @@ describe("user routes", () => {
       });
     });
 
+    describe("given a username that does not meet username requirements", () => {
+      it("will return 400", async () => {
+        userServices.duplicateUserCheck.mockImplementation(() => undefined);
+        userServices.generateNewUser.mockImplementation(() => mockUser);
+
+        await request(app)
+          .post("/users")
+          .send({ username: "T", password: "testPassword22" })
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "Invalid user input received",
+          })
+          .expect(400);
+      });
+    });
+
+    describe("given a username that does not meet username requirements", () => {
+      it("will return 400", async () => {
+        userServices.duplicateUserCheck.mockImplementation(() => undefined);
+        userServices.generateNewUser.mockImplementation(() => mockUser);
+
+        await request(app)
+          .post("/users")
+          .send({ username: "testUser22", password: "1" })
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "Invalid user input received",
+          })
+          .expect(400);
+      });
+    });
+
     describe("given a duplicate username", () => {
       it("will return 409", async () => {
         userServices.duplicateUserCheck.mockImplementation(() => mockUser);

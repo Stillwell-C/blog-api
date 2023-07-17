@@ -111,11 +111,11 @@ describe("Post - mongo memory server", () => {
       //Get user info
       const newUser = await request(app)
         .post("/users")
-        .send({ username: "testUser", password: "123456" });
+        .send({ username: "testUser", password: "a1234567" });
 
       const loggedInUser = await request(app)
         .post("/auth")
-        .send({ username: "testUser", password: "123456" });
+        .send({ username: "testUser", password: "a1234567" });
 
       const { accessToken } = JSON.parse(loggedInUser.text);
       const userID = jwt.verify(
