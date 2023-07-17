@@ -340,7 +340,7 @@ describe("post routes", () => {
           .post("/posts/")
           .send(postNoTitle)
           .expect("Content-Type", /json/)
-          .expect({ message: "All parameters required" })
+          .expect({ message: "Title and text body required" })
           .expect(400);
 
         const postNoText = { ...mockPostData[0] };
@@ -349,7 +349,7 @@ describe("post routes", () => {
           .post("/posts/")
           .send(postNoText)
           .expect("Content-Type", /json/)
-          .expect({ message: "All parameters required" })
+          .expect({ message: "Title and text body required" })
           .expect(400);
 
         const postNoAuthor = { ...mockPostData[0] };
@@ -358,8 +358,8 @@ describe("post routes", () => {
           .post("/posts/")
           .send(postNoAuthor)
           .expect("Content-Type", /json/)
-          .expect({ message: "All parameters required" })
-          .expect(400);
+          .expect({ message: "Please sign in before submitting post." })
+          .expect(401);
       });
     });
 
