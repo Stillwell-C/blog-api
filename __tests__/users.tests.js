@@ -12,7 +12,7 @@ const mockMongooseId = new mongoose.Types.ObjectId().toString();
 const mockUser = {
   _id: mockMongooseId,
   username: "mockUser",
-  password: "password",
+  password: "a1234567",
   roles: ["user", "contributor"],
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -73,7 +73,7 @@ describe("user routes", () => {
     });
   });
 
-  describe("get user route", () => {
+  describe("get users route", () => {
     describe("given that users exist", () => {
       it("returns a 200", async () => {
         verifyJWT.mockImplementation((req, res, next) => next());
@@ -106,6 +106,33 @@ describe("user routes", () => {
           .expect(400);
 
         expect(userServices.findMultipleUsers).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe("given that invalid pagination is entered", () => {
+      it("returns a 400", async () => {
+        verifyJWT.mockImplementation((req, res, next) => next());
+        userServices.findMultipleUsers.mockImplementation(() => [
+          mockUser,
+          mockUser,
+          mockUser,
+        ]);
+
+        await request(app)
+          .get("/users?page=wkdj")
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "Invalid user input received",
+          })
+          .expect(400);
+
+        await request(app)
+          .get("/users?limit=wkdj")
+          .expect("Content-Type", /json/)
+          .expect({
+            message: "Invalid user input received",
+          })
+          .expect(400);
       });
     });
   });
@@ -268,7 +295,7 @@ describe("user routes", () => {
 
         await request(app)
           .patch("/users")
-          .send({ id: "fakeid2222", ...mockUser })
+          .send({ id: new mongoose.Types.ObjectId().toString(), ...mockUser })
           .expect("Content-Type", /json/)
           .expect({
             message: "Username not available",
