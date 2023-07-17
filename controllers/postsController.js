@@ -139,7 +139,6 @@ const updatePost = async (req, res) => {
 const updatePostLike = async (req, res) => {
   const valResult = validationResult(req);
   if (!valResult.isEmpty()) {
-    console.log(valResult);
     return res.status(400).json({ message: "Invalid user input received" });
   }
 
