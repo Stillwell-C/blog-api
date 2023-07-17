@@ -13,6 +13,7 @@ const {
   validatePagination,
   validateMongooseID,
 } = require("../validation/generalValidation");
+const { validateGetUserComments } = require("../validation/commentValidation");
 
 router
   .route("/")
@@ -23,7 +24,9 @@ router
 
 router.route("/:id").get(validateMongooseID(), usersController.getUser);
 
-router.route("/:id/posts").get(postsController.getUserPosts);
+router
+  .route("/:id/posts")
+  .get(validateGetUserComments(), postsController.getUserPosts);
 
 router.route("/:id/comments").get(commentsController.getUserComments);
 
