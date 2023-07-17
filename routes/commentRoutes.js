@@ -6,12 +6,16 @@ const {
   validateMongooseID,
   validatePagination,
 } = require("../validation/generalValidation");
+const {
+  validatePatchComment,
+  validateNewComment,
+} = require("../validation/commentValidation");
 
 router
   .route("/")
   .get(validatePagination(), commentsController.getComments)
-  .post(verifyJWT, commentsController.createComment)
-  .patch(verifyJWT, commentsController.updateComment)
+  .post(verifyJWT, validateNewComment(), commentsController.createComment)
+  .patch(verifyJWT, validatePatchComment(), commentsController.updateComment)
   .delete(verifyJWT, commentsController.deleteComment);
 
 router.route("/:id").get(validateMongooseID(), commentsController.getComment);
