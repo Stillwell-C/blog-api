@@ -9,8 +9,13 @@ const {
   generateRefreshToken,
   verifyJWTAndReturnUser,
 } = require("../service/auth.services");
+const { validationResult } = require("express-validator");
 
 const login = async (req, res) => {
+  const valResult = validationResult(req);
+  if (!valResult.isEmpty()) {
+    return res.status(400).json({ message: "Invalid user input received" });
+  }
   const { username, password } = req.body;
 
   if (!username || !password) {
