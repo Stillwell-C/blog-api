@@ -4,11 +4,19 @@ const usersController = require("../controllers/usersController");
 const commentsController = require("../controllers/commentsController");
 const postsController = require("../controllers/postsController");
 const verifyJWT = require("../middleware/verifyJWT");
+const {
+  createUsernameChain,
+  createPasswordChain,
+} = require("../validation/userValidation");
 
 router
   .route("/")
   .get(verifyJWT, usersController.getAllUsers)
-  .post(usersController.createNewUser)
+  .post(
+    createUsernameChain(),
+    createPasswordChain(),
+    usersController.createNewUser
+  )
   .patch(verifyJWT, usersController.updateUser)
   .delete(verifyJWT, usersController.deleteUser);
 
