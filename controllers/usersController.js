@@ -15,6 +15,11 @@ const {
 } = require("../service/auth.services");
 
 const getUser = async (req, res) => {
+  const valResult = validationResult(req);
+  if (!valResult.isEmpty()) {
+    return res.status(400).json({ message: "Invalid user input received" });
+  }
+
   if (!req?.params?.id)
     return res.status(400).json({ message: "User ID required" });
 
