@@ -119,6 +119,12 @@ const updateUser = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
+  const valResult = validationResult(req);
+  if (!valResult.isEmpty()) {
+    console.log(valResult);
+    return res.status(400).json({ message: "Invalid user input received" });
+  }
+
   const { id, adminPassword } = req.body;
 
   if (!id) {
