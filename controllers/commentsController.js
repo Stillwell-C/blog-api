@@ -8,9 +8,15 @@ const {
   findAndUpdateComment,
   findAndDeleteComment,
 } = require("../service/comments.services");
+const { validationResult } = require("express-validator");
 
 //Maybe remove, but could be useful for moderation
 const getComment = async (req, res) => {
+  const valResult = validationResult(req);
+  if (!valResult.isEmpty()) {
+    return res.status(400).json({ message: "Invalid user input received" });
+  }
+
   const id = req?.params?.id;
 
   if (!id) {
@@ -26,6 +32,11 @@ const getComment = async (req, res) => {
 };
 
 const getComments = async (req, res) => {
+  const valResult = validationResult(req);
+  if (!valResult.isEmpty()) {
+    return res.status(400).json({ message: "Invalid user input received" });
+  }
+
   const { page, limit } = req.query;
 
   const totalComments = await Comment.countDocuments();
