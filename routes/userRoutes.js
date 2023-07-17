@@ -9,7 +9,10 @@ const {
   validatePatchUser,
   validateDeleteUser,
 } = require("../validation/userValidation");
-const { validatePagination } = require("../validation/generalValidation");
+const {
+  validatePagination,
+  validateMongooseID,
+} = require("../validation/generalValidation");
 
 router
   .route("/")
@@ -18,7 +21,7 @@ router
   .patch(verifyJWT, validatePatchUser(), usersController.updateUser)
   .delete(verifyJWT, validateDeleteUser(), usersController.deleteUser);
 
-router.route("/:id").get(usersController.getUser);
+router.route("/:id").get(validateMongooseID(), usersController.getUser);
 
 router.route("/:id/posts").get(postsController.getUserPosts);
 
