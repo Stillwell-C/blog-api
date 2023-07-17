@@ -127,6 +127,11 @@ const createComment = async (req, res) => {
 
 //Only allows for commentBody to be updated
 const updateComment = async (req, res) => {
+  const valResult = validationResult(req);
+  if (!valResult.isEmpty()) {
+    return res.status(400).json({ message: "Invalid user input received" });
+  }
+
   if (!req?.body?.id) {
     return res.status(400).json({ message: "Comment ID parameter required" });
   }
