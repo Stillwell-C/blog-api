@@ -11,7 +11,6 @@ const corsOptions = {
     }
   },
   optionsSuccessStatus: 200,
-  //See if this is necessary for cookies
   credentials: true,
 };
 
