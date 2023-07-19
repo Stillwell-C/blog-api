@@ -1,9 +1,7 @@
 const allowedOrigins = [
   "https://wild-goose-chase.onrender.com",
   "https://stillwell-c.github.io/blog-frontend/",
-  "https://www.stillwell-c.github.io/blog-frontend/",
-  "https://stillwell-c.github.io/",
-  "https://www.stillwell-c.github.io/",
+  "https://cosmic-caramel-c6fba2.netlify.app",
 ];
 
 module.exports = allowedOrigins;
