@@ -4,6 +4,7 @@ const corsOptions = {
   origin: (origin, callback) => {
     // Will allow req from things like postman
     // May remove for production
+    console.log("origin: ", origin);
     if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
       callback(null, true);
     } else {
