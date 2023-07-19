@@ -37,7 +37,5 @@ const app = createServer();
 
 mongoose.connection.once("open", () => {
   console.log("Connected to DB");
-  app.listen(PORT, "0.0.0.0", () =>
-    console.log(`Server running on port ${PORT}`)
-  );
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 });
