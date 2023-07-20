@@ -5,21 +5,16 @@ const {
 } = require("./generalValidation");
 
 const validateIdParam = () =>
-  param("id").optional().escape().trim().isLength(24).isHexadecimal();
+  param("id").optional().trim().isLength(24).isHexadecimal();
 
 const validateAuthor = () =>
-  body("author").optional().escape().trim().isLength(24).isHexadecimal();
+  body("author").optional().trim().isLength(24).isHexadecimal();
 
 const validateParentPostId = () =>
-  body("parentPostId").optional().escape().trim().isLength(24).isHexadecimal();
+  body("parentPostId").optional().trim().isLength(24).isHexadecimal();
 
 const validateCommentBody = () =>
-  body("commentBody")
-    .optional()
-    .escape()
-    .trim()
-    .isString()
-    .isLength({ max: 1000 });
+  body("commentBody").optional().trim().isString().isLength({ max: 1000 });
 
 const validateGetUserComments = () => {
   return [validatePagination(), validateIdParam()];
