@@ -4,27 +4,20 @@ const {
   validateMongooseID,
 } = require("./generalValidation");
 
-const validateTopQuery = () =>
-  query("top").optional().escape().trim().isString();
+const validateTopQuery = () => query("top").optional().trim().isString();
 
 const validatePostTitle = () =>
-  body("title").optional().escape().trim().isString().isLength({ max: 150 });
+  body("title").optional().trim().isString().isLength({ max: 150 });
 
 const validatePostEpigraph = () =>
-  body("epigraph").optional().escape().trim().isString().isLength({ max: 850 });
+  body("epigraph").optional().trim().isString().isLength({ max: 850 });
 
 const validatePostEpigraphAuthor = () =>
-  body("epigraphAuthor")
-    .optional()
-    .escape()
-    .trim()
-    .isString()
-    .isLength({ max: 70 });
+  body("epigraphAuthor").optional().trim().isString().isLength({ max: 70 });
 
 const validatePostText = () =>
   body("text")
     .optional()
-    .escape()
     .trim()
     .isString()
     .custom((titleString) => {
@@ -32,13 +25,13 @@ const validatePostText = () =>
     });
 
 const validatePostAuthor = () =>
-  body("author").optional().escape().trim().isLength(24).isHexadecimal();
+  body("author").optional().trim().isLength(24).isHexadecimal();
 
 const validatePostID = () =>
-  body("postID").optional().escape().trim().isLength(24).isHexadecimal();
+  body("postID").optional().trim().isLength(24).isHexadecimal();
 
 const validateUserID = () =>
-  body("userID").optional().escape().trim().isLength(24).isHexadecimal();
+  body("userID").optional().trim().isLength(24).isHexadecimal();
 
 const validateIncrement = () => body("increment").optional().isNumeric();
 
