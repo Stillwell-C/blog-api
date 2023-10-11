@@ -42,7 +42,7 @@ const login = async (req, res) => {
   res.cookie("jwt", refreshToken, {
     //Change later to https
     //Not accessible to JS
-    httpsOnly: true,
+    httpOnly: true,
     secure: true,
     sameSite: "None",
     maxAge: 7 * 24 * 60 * 60 * 1000,
