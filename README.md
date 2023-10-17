@@ -12,7 +12,7 @@ The application is live at https://wild-goose-chase.vercel.app/
 
 View the frontend code [here](https://github.com/Stillwell-C/blog-frontend)
 
-Or the API's landing page [here](wild-goose-chase-api-production.up.railway.app)
+Or the API's landing page [here](https://wild-goose-chase-api-production.up.railway.app)
 
 ## Description
 
