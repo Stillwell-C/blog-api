@@ -51,7 +51,7 @@ Authentication is handled with a JWT refresh token stored in an HTTP only secure
 
 If a user is logged in and does not have a JWT access token (e.g. the user has refreshed their page) or has sent a request to the sever that has been rejected due to an expired access token, the front end will automatically access the API's refresh route and save the access token received before reattempting the user's initial request.
 
-Specific routes such as the "My Page" dashboard require a valid JWT access token to access. JWT verification is done using the [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) package. Anytime a user's ID is used on the backend (e.g. requesting a user's feed, updating data, etc.), this is supplied by the decoded access token.
+Specific routes such as the "My Page" dashboard require a valid JWT access token to access. JWT verification is done using the [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) package. Routes requiring JWT are protected on the front end to ensure that a user is logged in or has the necessary roles to view a page (e.g. a logged in account with the role user will not be able to visit the admin dashboard by using the admin dashboard URL).
 
 [RTK Query](https://redux-toolkit.js.org/rtk-query/overview) is used to make server requests and cache/invalidate data.
 
@@ -74,6 +74,8 @@ Throughout this project, I have tried to make this website accessible to screen 
 The [focus-trap-react](https://www.npmjs.com/package/focus-trap-react) package is used to trap focus when a modal is present on the screen. All modals can be exited using the escape key.
 
 #### Additional Info
+
+All links/buttons leading to the log in and sign up pages will send the address of the page the user is currently on to the log in/sign up component. Upon successfully logging in, a user will be redirected back to their original page.
 
 Almost all text content was generated using ChatGPT.
 
