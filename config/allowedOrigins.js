@@ -1,9 +1,3 @@
-const allowedOrigins = [
-  "https://wild-goose-chase.vercel.app",
-  "http://wild-goose-chase.vercel.app",
-  "https://www.wild-goose-chase.vercel.app",
-  "http://www.wild-goose-chase.vercel.app",
-  "wild-goose-chase.vercel.app",
-];
+const allowedOrigins = ["http://localhost:5173/"];
 
 module.exports = allowedOrigins;
