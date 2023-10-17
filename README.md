@@ -20,7 +20,7 @@ Or the API's landing page [here](wild-goose-chase-api-production.up.railway.app)
 
 - Built using MERN stack / REST API
 - Reponsive, mobile-first UI
-- RTK Query
+- RTK Query for querying/caching data
 - Authentication with JWT refresh & access tokens
 - Protected frontend routes
 - Create/delete user accounts
