@@ -39,7 +39,7 @@ This application was made to function as a simple blog.
 
 #### UI
 
-The UI was made to be responsive with a mobile-first design and should function on both mobile devices and web browsers with larger screens. SCSS was used to style most components.
+The UI was made to be responsive with a mobile-first design and should function on both mobile devices and web browsers with larger screens. CSS was used to style most components.
 
 #### API & Authentication
 
@@ -90,7 +90,7 @@ Almost all text content was generated using ChatGPT.
 - ReactJS
 - React Router
 - RTK Query / Redux Toolkit
-- SASS
+- CSS
 
 ### Backend
 
