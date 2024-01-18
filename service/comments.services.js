@@ -58,7 +58,7 @@ const findPostComments = async (page, limit, postId) => {
     const commentsSkip = (pageInt - 1) * limitInt;
 
     return Comment.find({ parentPostId: postId })
-      .sort("createdAt")
+      .sort({ createdAt: 1, _id: 1 })
       .limit(limitInt)
       .skip(commentsSkip)
       .lean()
@@ -66,7 +66,7 @@ const findPostComments = async (page, limit, postId) => {
       .exec();
   } else {
     return Comment.find({ parentPostId: postId })
-      .sort("createdAt")
+      .sort({ createdAt: 1, _id: 1 })
       .lean()
       .populate("author", "_id username")
       .exec();
