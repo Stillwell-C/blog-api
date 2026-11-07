@@ -1,5 +1,6 @@
 const errorHandler = (err, req, res, next) => {
   console.log("Error handler called");
+  console.log (err)
   //Add logging feature
   const status = res.statusCode ? res.statusCode : 500;
 
